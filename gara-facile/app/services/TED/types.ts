@@ -31,6 +31,9 @@ export type TedField =
   | "deadline-receipt-tender-date-lot"
   | "contract-duration-start-date-lot"
   | "contract-duration-end-date-lot"
+  | "duration-period-value-lot"
+  | "duration-period-unit-lot"
+  | "renewal-description-lot"
   | "place-of-performance-country-proc"
   | "place-of-performance-country-lot"
   | "place-of-performance-city-proc"
@@ -45,6 +48,8 @@ export type TedField =
   | "submission-url-lot"
   | "submission-nonelectronic-lot"
   | "submission-nonelectronic-description-lot"
+  | "electronic-submission-lot"
+  | "submission-language"
   | "touchpoint-email-tender-receip-lot"
   | "touchpoint-email-buyer"
   | "buyer-profile"
@@ -96,6 +101,9 @@ export interface TedNotice {
   "deadline-receipt-tender-date-lot"?: string[];
   "contract-duration-start-date-lot"?: string[];
   "contract-duration-end-date-lot"?: string[];
+  "duration-period-value-lot"?: string[];
+  "duration-period-unit-lot"?: string[];
+  "renewal-description-lot"?: TedLocalizedTextList;
 
   // LOCATION & DELIVERY
   "place-of-performance-country-proc"?: string[];
@@ -117,6 +125,8 @@ export interface TedNotice {
   // SUBMISSIONS & CONTACT POINTS
   "submission-nonelectronic-lot"?: string[];
   "submission-nonelectronic-description-lot"?: TedLocalizedTextList;
+  "electronic-submission-lot"?: boolean[];
+  "submission-language"?: string[];
   "touchpoint-email-tender-receip-lot"?: string[];
   "touchpoint-email-buyer"?: string[];
   "buyer-profile"?: string[];
