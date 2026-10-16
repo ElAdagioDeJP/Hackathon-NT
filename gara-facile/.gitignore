@@ -38,6 +38,9 @@ yarn-error.log*
 # private local file storage
 /var/uploads/
 
+# Generated locally from app/db/schema.ts; do not commit migration artifacts.
+/drizzle/
+
 # vercel
 .vercel
 

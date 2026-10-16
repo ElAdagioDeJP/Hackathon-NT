@@ -16,8 +16,8 @@ for (const populated of [false, true]) {
   if (populated) {
     for (const statement of migrations[0].sql) sqlite.exec(statement);
     sqlite.exec(`
-      INSERT INTO businesses VALUES (1, 'Existing business', 'contact@example.test', '123', 'ESP', 'Valencia');
-      INSERT INTO business_records VALUES (1, 1);
+      INSERT INTO businesses (id, name, email, phone, country, city) VALUES (1, 'Existing business', 'contact@example.test', '123', 'ESP', 'Valencia');
+      INSERT INTO business_records (id, business_id) VALUES (1, 1);
       INSERT INTO contracts VALUES ('TED-1', 'Existing opportunity', 'https://example.test');
       INSERT INTO contract_matches VALUES (1, 'TED-1', 1, 'partial', 50);
       INSERT INTO submissions VALUES (1, 1, X'0102', 123);

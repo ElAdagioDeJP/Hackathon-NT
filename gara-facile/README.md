@@ -10,6 +10,7 @@ Usa Bun 1.4.2, la versión indicada en `package.json`. Las versiones anteriores 
 cd gara-facile
 bun install --frozen-lockfile
 cp -n .env.example .env
+bun run db:generate
 bun run db:migrate
 bun run dev --hostname 0.0.0.0
 ```
@@ -46,18 +47,12 @@ Consulta [docs/files-api.md](docs/files-api.md) para configuración, endpoints, 
 
 Los archivos no se almacenan como BLOB. `storageKey` es una referencia relativa y única al archivo. `storageProvider` y `storageBucket` conservan su ubicación aunque cambie el destino de nuevas subidas. Las ediciones y los cambios de documentos vuelven a poner el perfil en borrador y actualizan sus fechas. Si un perfil ya está referenciado por un match, su edición se rechaza para conservar ese contexto; la creación de versiones posteriores queda para el flujo de matching.
 
-Las migraciones son:
-
-- `drizzle/0000_initial_schema.sql`: esquema original del repositorio.
-- `drizzle/0001_business_onboarding.sql`: datos del formulario, documentos y contactos opcionales. Corrige también el valor por defecto de `submissions.created_at` para calcularlo al insertar, en lugar de fijarlo cuando se evalúa el esquema.
-- `drizzle/0002_document_storage.sql`: proveedor y bucket por documento; los registros existentes usan `local` por defecto.
-- `drizzle/0003_browser_profile_sessions.sql`: sesiones privadas de navegador asociadas a un perfil, con hash y caducidad.
-
-La segunda migración fue generada con Drizzle y ajustada para SQLite: reconstruye tablas conservando registros y claves, recrea la vista dependiente y comprueba las relaciones antes de finalizar. Esto permite añadir fechas automáticas incluso cuando ya hay datos.
+Solo se versiona el schema actualizado. Las migraciones y snapshots de `drizzle/` se generan localmente y están excluidos de Git. Genera las migraciones antes de ejecutar las pruebas de base de datos, perfiles o archivos en un checkout nuevo.
 
 Para una **base nueva**, configura `DB_FILE_NAME` y ejecuta:
 
 ```bash
+bun run db:generate
 DB_FILE_NAME=./sqlite.db bun run db:migrate
 ```
 
