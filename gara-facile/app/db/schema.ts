@@ -7,6 +7,7 @@ import {
   sqliteView,
 } from "drizzle-orm/sqlite-core";
 import { eq } from "drizzle-orm";
+import { EU_COUNTRY_CODES } from "../utils/constants";
 
 // TABLES
 export const contracts = sqliteTable("contracts", {
@@ -20,7 +21,10 @@ export const businesses = sqliteTable("businesses", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
-  address: text("address").notNull(),
+  country: text("country", {
+    enum: EU_COUNTRY_CODES as [string, ...string[]],
+  }).notNull(),
+  city: text("city").notNull(),
 });
 
 export const businessRecords = sqliteTable("business_records", {
