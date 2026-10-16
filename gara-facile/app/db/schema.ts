@@ -11,7 +11,7 @@ import { EU_COUNTRY_CODES } from "../utils/constants";
 
 // TABLES
 export const contracts = sqliteTable("contracts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey(),
   title: text("title").notNull(),
   url: text("url").notNull(),
 });
@@ -36,7 +36,7 @@ export const businessRecords = sqliteTable("business_records", {
 
 export const contractMatches = sqliteTable("contract_matches", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  contractId: integer("contract_id")
+  contractId: text("contract_id")
     .notNull()
     .references(() => contracts.id),
   businessRecordId: integer("business_record_id")
