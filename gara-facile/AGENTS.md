@@ -1,3 +1,7 @@
+## Product language
+
+Write all application UI in English, including navigation, form labels, placeholders, validation and status messages, sample content, country names, accessibility labels, and page metadata. Set the document language to `en`. Preserve user-entered content and the Gara Facile brand name.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know

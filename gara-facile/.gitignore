@@ -33,6 +33,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# private local file storage
+/var/uploads/
 
 # vercel
 .vercel
