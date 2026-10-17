@@ -11,7 +11,7 @@
 | D3 BAL-103 `ai/profileFacts.ts` + empresa demo | hecha | 021c388 · test:ai ok |
 | D1 BAL-101 llaves Evolus | hecha | 7930d44 · `GET /workflows` 200 |
 | D2 BAL-102 cliente `ai/evolus.ts` | hecha | 64b72d1 + 97ecebf |
-| **D4 BAL-104 biblioteca** | **en curso (código listo, falta la prueba real)** | test:ai 13/13, eslint ok |
+| D4 BAL-104 biblioteca | hecha | f2655d5 · test:ai 13/13 · subida real 201, indexada |
 | D5 BAL-105 BYOM | pendiente ⛓ tu vLLM (J1) | |
 | D6 BAL-106 borrador | pendiente ⛓ tu `llm.ts` (J3) | |
 | D7 BAL-110 agente + `/api/ai/chat` | pendiente ⛓ D4 + D5 | |
@@ -24,7 +24,7 @@ Rama de trabajo: `docs/hackathon-plan`. `main` no se toca hasta fusionar lo tuyo
 
 ## 2. Llaves (nunca en git)
 - JP te pasa por privado el archivo `evolus-jp.env`. Pega sus líneas en `gara-facile/.env`.
-- Contiene `EVOLUS_API_KEY` y `EVOLUS_APP_ID` (con valor). Vacíos por ahora: `EVOLUS_LIBRARY_ID`, `EVOLUS_AGENT_ID`, `EVOLUS_EXTRACTOR_ID`, `EVOLUS_BASE_URL`.
+- Contiene `EVOLUS_API_KEY` y `EVOLUS_APP_ID` (con valor). `EVOLUS_LIBRARY_ID` también va puesto. Vacíos: `EVOLUS_AGENT_ID`, `EVOLUS_EXTRACTOR_ID`, `EVOLUS_BASE_URL`.
 - Prueba gratis de que la llave funciona: `GET https://api.evolus.ai/api/v1/workflows` con headers `X-ApiKey` + `X-Application-Id` → 200.
 - No imprimas la llave en logs, commits, Linear ni chats.
 
@@ -35,8 +35,8 @@ Rama de trabajo: `docs/hackathon-plan`. `main` no se toca hasta fusionar lo tuyo
 - `app/services/ai/profileFacts.ts`: `getCompanyFacts(businessRecordId?)` devuelve `CompanyFacts`; sin id o sin base de datos usa la empresa demo (`fixtures/company/demo-company.json`).
 - `app/services/ai/_contract.mock.ts`: copia provisional del contrato. Cuando publiques `types.ts`, cambia los imports a `./types` y borra el mock.
 
-## 4. D4: cómo terminarla
-**Código (en `docs/hackathon-plan` si JP llegó a hacer push; si no, ver el aviso al final):**
+## 4. D4: hecha (lo que hay)
+**Código (en `docs/hackathon-plan`, f2655d5):**
 - `app/services/ai/library.ts`
   - `companyFactsText(facts)`: ficha de empresa en texto, en italiano.
   - `syncLibrary(files, language, deps?)`: sube a `POST /memories/{EVOLUS_LIBRARY_ID}/documents?language=it`. Pone una huella (sha256, 12 caracteres) en el nombre del archivo y salta lo que ya está en la biblioteca. Salta los formatos no soportados (vale: txt, md, csv, json, xml, html, pdf, docx). Para en el primer error, sin reintentos.
@@ -46,23 +46,22 @@ Rama de trabajo: `docs/hackathon-plan`. `main` no se toca hasta fusionar lo tuyo
   - Responde `{ libraryId, uploaded: [{ title, documentId }], skipped: [{ title, reason }] }`.
 - `app/services/ai/library.test.ts`: 4 pruebas con `fetch` falso.
 
-**Pasos que faltan:**
-1. **Crear la biblioteca en el portal** (el login es solo con Gmail, por eso no se hace por API). Las instrucciones para la extensión Claude in Chrome están en `C:\Users\Usuario 1\Downloads\evolus-D4-biblioteca-instrucciones.md` (PC de JP). En resumen:
-   - Anota los créditos: `/company/billing` → `Usage`.
-   - En `/company/libraries`, comprueba que no exista ya `Gara Facile — Company KB`.
-   - Si no existe, créala vacía con `PDF READING` = `Let Evolus decide`.
-   - Copia el ID (GUID).
-   - Ojo: `GET /api/v1/memories` (listar bibliotecas) da **401** con la llave de la app, porque pide llave de usuario. La comprobación se hace en el portal.
-2. Pon `EVOLUS_LIBRARY_ID=<guid>` en `gara-facile/.env`.
-3. `cd gara-facile && bun run dev` y luego:
-   `curl -s -X POST http://localhost:3000/api/ai/evolus/library/sync -H "Content-Type: application/json" -d "{}"`
-   Debe subir **1 documento** (la ficha demo).
-4. Comprueba:
-   - Que el documento se lista: `GET /api/v1/memories/{id}/documents`, gratis.
-   - Que el `title` guardado conserva el nombre con la huella. **Esto no se ha comprobado todavía, y el salto de duplicados depende de ello.** Si Evolus cambia el título, guarda la huella en `description` (`PUT .../documents/{docId}`) y compara contra ese campo.
-5. Repite el `curl`: debe responder `uploaded: []` y `skipped: [{ reason: "unchanged" }]`.
-6. Anota los créditos después. Haz captura de la biblioteca en el portal para `docs/evolus.md` (D10).
-7. Cierre: `bun run test:ai` + `bunx eslint app/services/ai app/api/ai`, commit, push a docs y BAL-104 → Done.
+**Prueba real (17 oct, hecha):**
+1. Biblioteca creada en el portal: `Gara Facile — Company KB`, tipo **RAG library** (el tipo ya no se puede cambiar), motor `openai/text-embedding-3-small`, PDF READING `Let Evolus decide`. No había otra igual. La otra que existe, `arepa-powerMemory1`, está vacía y no se usa.
+2. `EVOLUS_LIBRARY_ID` está puesto en el `.env` de JP y en `evolus-jp.env`.
+3. `curl -s -X POST http://localhost:3000/api/ai/evolus/library/sync -H "Content-Type: application/json" -d "{}"` → subió `scheda-azienda-demo-3c278b17149f.txt` (201).
+4. `GET /memories/{id}/documents` → el `title` conserva la huella y `ingestionStatus` = 2, `chunkCount` = 2, `ingestionError` = null. Indexado.
+5. La segunda llamada responde `uploaded: []`, `skipped: [{ reason: "unchanged" }]`. No sube duplicados.
+
+**Notas del portal (rediseño):**
+- `/company/libraries` ahora es `/libraries`.
+- Los créditos están en `/company/billing/credits` y el uso en `/company/billing/usage`.
+- La URL del portal no muestra el ID de la biblioteca: sale en la pestaña de red (`memories/{id}/documents`).
+- `GET /api/v1/memories` (listar bibliotecas) da 401 con la llave de la app, porque pide llave de usuario.
+
+**Pendiente menor:**
+- Mirar en `/company/billing/credits` cuánto gastó la indexación (antes había 49.998).
+- Probar la ruta con `businessRecordId` (necesita la base de datos local y la cookie del perfil).
 
 ## 5. Siguientes (resumen; el detalle está en EVOLUS.md)
 - **D5 BYOM:** portal `/own-models` → `+ Connect your own server` → `OpenAI-compatible` → `BASE URL` `http://<ip>:8001/v1` (Qwen) + key de vLLM → **Test connection** en verde → Save. Nunca "Save anyway" con el test en rojo.
@@ -87,5 +86,6 @@ Rama de trabajo: `docs/hackathon-plan`. `main` no se toca hasta fusionar lo tuyo
 - Commits: Conventional Commits, `git add` con rutas explícitas.
 
 ## 8. Evolus: valores por actualizar
-- `EVOLUS_LIBRARY_ID`: _pendiente (lo da la extensión de Chrome)_
-- Créditos antes / después de D4: _pendiente_
+- `EVOLUS_LIBRARY_ID`: `4fc28ed1-70ca-f111-bf5b-6045bd9ce552` (un ID, no una llave)
+- Créditos: 49.998 antes y después de crear la biblioteca (crearla no gasta). Después de indexar la ficha: _por mirar en el portal_.
+- Workspace: `arepa-power` (Developer Event). Capturas: en el PC de JP, `Downloads\d4\`.
