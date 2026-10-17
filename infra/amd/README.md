@@ -7,8 +7,8 @@ OpenAI-compatible endpoints running on AMD GPUs. The app only needs `.env`:
 
 ```
 LLM_EXTRACT_BASE_URL=https://developer.amd.com.cn/radeon/api/v1
-LLM_EXTRACT_MODEL=Qwen3.8-27B
-LLM_EXTRACT_REASONING_EFFORT=low
+LLM_EXTRACT_MODEL=Gemma-4-31B-IT
+LLM_EXTRACT_REASONING_EFFORT=
 LLM_DRAFT_BASE_URL=https://developer.amd.com.cn/radeon/api/v1
 LLM_DRAFT_MODEL=Gemma-4-31B-IT
 LLM_EXTRACT_API_KEY / LLM_DRAFT_API_KEY = the team key
