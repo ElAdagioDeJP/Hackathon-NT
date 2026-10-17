@@ -463,7 +463,7 @@ test("local storage blocks path traversal, symlink escapes and accidental overwr
   }
 });
 
-test("S3 adapter uses the real SDK against a local S3-compatible HTTP fixture and preserves old locations", async () => {
+test("R2 adapter uses the real SDK against a local R2-compatible HTTP fixture and preserves old locations", async () => {
   const objects = new Map<string, Buffer>();
   const requests: { method: string; path: string; authorization: string }[] =
     [];
@@ -500,8 +500,8 @@ test("S3 adapter uses the real SDK against a local S3-compatible HTTP fixture an
   await once(server, "listening");
   const f = await fixture();
   const address = server.address() as { port: number };
-  const s3 = {
-    region: "us-east-1",
+  const r2 = {
+    region: "auto",
     endpoint: `http://127.0.0.1:${address.port}`,
     forcePathStyle: true,
     credentials: { accessKeyId: "test", secretAccessKey: "test" },
@@ -511,10 +511,10 @@ test("S3 adapter uses the real SDK against a local S3-compatible HTTP fixture an
   };
   try {
     const storage = createDocumentStorage({
-      provider: "s3",
+      provider: "r2",
       localDirectory: f.directory,
-      s3Bucket: "old-bucket",
-      s3,
+      r2Bucket: "old-bucket",
+      r2,
     });
     const service = createDocumentService(f.db, storage);
     const document = await service.upload(1, pdf(), "context");
@@ -527,8 +527,8 @@ test("S3 adapter uses the real SDK against a local S3-compatible HTTP fixture an
       createDocumentStorage({
         provider: "local",
         localDirectory: f.directory,
-        s3Bucket: "new-bucket",
-        s3,
+        r2Bucket: "new-bucket",
+        r2,
       }),
     );
     assert.deepEqual(
@@ -570,7 +570,7 @@ test("S3 adapter uses the real SDK against a local S3-compatible HTTP fixture an
   }
 });
 
-test("configuration rejects unknown providers, public directories and incomplete S3 settings", () => {
+test("configuration rejects unknown providers, public directories and incomplete R2 settings", () => {
   assert.equal(storageConfigFromEnv({}).provider, "local");
   assert.throws(() =>
     storageConfigFromEnv({ FILES_STORAGE_PROVIDER: "unknown" }),
@@ -579,10 +579,26 @@ test("configuration rejects unknown providers, public directories and incomplete
     storageConfigFromEnv({ FILES_LOCAL_DIR: "./public/uploads" }),
   );
   assert.throws(() => storageConfigFromEnv({ FILES_STORAGE_PROVIDER: "s3" }));
+  assert.throws(() => storageConfigFromEnv({ FILES_STORAGE_PROVIDER: "r2" }));
+  assert.throws(() => storageConfigFromEnv({ R2_ACCESS_KEY_ID: "only-one" }));
   assert.throws(() =>
-    storageConfigFromEnv({ FILES_S3_ACCESS_KEY_ID: "only-one" }),
+    storageConfigFromEnv({
+      R2_ACCOUNT_ID: "not-an-account",
+      R2_ACCESS_KEY_ID: "id",
+      R2_SECRET_ACCESS_KEY: "secret",
+      R2_BUCKET: "bucket",
+    }),
   );
-  assert.throws(() =>
-    storageConfigFromEnv({ FILES_S3_ENDPOINT: "file:///tmp" }),
+  const r2 = storageConfigFromEnv({
+    FILES_STORAGE_PROVIDER: "r2",
+    R2_ACCOUNT_ID: "0123456789abcdef0123456789abcdef",
+    R2_ACCESS_KEY_ID: "id",
+    R2_SECRET_ACCESS_KEY: "secret",
+    R2_BUCKET: "garefacile",
+  });
+  assert.equal(r2.r2Bucket, "garefacile");
+  assert.equal(
+    r2.r2?.endpoint,
+    "https://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com",
   );
 });

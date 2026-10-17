@@ -28,7 +28,7 @@ const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "star
   env: {
     ...process.env, DB_FILE_NAME: databasePath, FILES_API_TOKEN: token,
     FILES_STORAGE_PROVIDER: "local", FILES_LOCAL_DIR: join(directory, "uploads"),
-    FILES_S3_ACCESS_KEY_ID: "", FILES_S3_SECRET_ACCESS_KEY: "", FILES_S3_ENDPOINT: "", FILES_S3_FORCE_PATH_STYLE: "false",
+    R2_ACCOUNT_ID: "", R2_ACCESS_KEY_ID: "", R2_SECRET_ACCESS_KEY: "", R2_BUCKET: "",
   },
   stdio: ["ignore", "pipe", "pipe"],
 });

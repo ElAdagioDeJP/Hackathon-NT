@@ -98,7 +98,7 @@ export const businessDocuments = sqliteTable(
     mimeType: text("mime_type").notNull(),
     sizeBytes: integer("size_bytes").notNull(),
     storageKey: text("storage_key").notNull().unique(),
-    storageProvider: text("storage_provider", { enum: ["local", "s3"] })
+    storageProvider: text("storage_provider", { enum: ["local", "r2"] })
       .notNull()
       .default("local"),
     storageBucket: text("storage_bucket"),

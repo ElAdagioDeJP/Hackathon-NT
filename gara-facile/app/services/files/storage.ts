@@ -11,7 +11,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { FileApiError, StoredFileNotFound } from "./errors";
 
-export type StorageProvider = "local" | "s3";
+export type StorageProvider = "local" | "r2";
 export interface StorageLocation {
   storageProvider: StorageProvider;
   storageBucket: string | null;
@@ -134,7 +134,8 @@ export class LocalObjectStore implements ObjectStore {
   }
 }
 
-export class S3ObjectStore implements ObjectStore {
+// Cloudflare R2 through its S3-compatible API.
+export class R2ObjectStore implements ObjectStore {
   constructor(
     private readonly client: S3Client,
     private readonly bucket: string,
@@ -191,15 +192,22 @@ export class S3ObjectStore implements ObjectStore {
 export interface StorageConfig {
   provider: StorageProvider;
   localDirectory: string;
-  s3Bucket?: string;
-  s3?: S3ClientConfig;
+  r2Bucket?: string;
+  r2?: S3ClientConfig;
 }
+
+const R2_REQUIRED = [
+  "R2_ACCOUNT_ID",
+  "R2_ACCESS_KEY_ID",
+  "R2_SECRET_ACCESS_KEY",
+  "R2_BUCKET",
+] as const;
 
 export function storageConfigFromEnv(
   env: Record<string, string | undefined> = process.env,
 ): StorageConfig {
   const provider = env.FILES_STORAGE_PROVIDER ?? "local";
-  if (provider !== "local" && provider !== "s3")
+  if (provider !== "local" && provider !== "r2")
     throw new FileApiError(
       503,
       "STORAGE_CONFIG",
@@ -215,49 +223,40 @@ export function storageConfigFromEnv(
       "STORAGE_CONFIG",
       "The upload directory must be outside public assets.",
     );
-  if (provider === "s3" && !env.FILES_S3_BUCKET)
+  const configured = R2_REQUIRED.filter((name) => env[name]);
+  if (configured.length && configured.length < R2_REQUIRED.length)
     throw new FileApiError(
       503,
       "STORAGE_CONFIG",
-      "The file storage bucket is not configured.",
+      "Incomplete R2 settings.",
     );
-  if (
-    Boolean(env.FILES_S3_ACCESS_KEY_ID) !==
-    Boolean(env.FILES_S3_SECRET_ACCESS_KEY)
-  )
+  if (provider === "r2" && !configured.length)
     throw new FileApiError(
       503,
       "STORAGE_CONFIG",
-      "Incomplete file storage credentials.",
+      "The R2 bucket is not configured.",
     );
-  if (env.FILES_S3_ENDPOINT && !/^https?:\/\//.test(env.FILES_S3_ENDPOINT))
+  if (env.R2_ACCOUNT_ID && !/^[a-f0-9]{32}$/i.test(env.R2_ACCOUNT_ID))
     throw new FileApiError(
       503,
       "STORAGE_CONFIG",
-      "Invalid file storage endpoint.",
-    );
-  if (
-    env.FILES_S3_FORCE_PATH_STYLE &&
-    !["true", "false"].includes(env.FILES_S3_FORCE_PATH_STYLE)
-  )
-    throw new FileApiError(
-      503,
-      "STORAGE_CONFIG",
-      "Invalid path-style setting.",
+      "Invalid R2 account ID.",
     );
   return {
     provider,
     localDirectory,
-    s3Bucket: env.FILES_S3_BUCKET,
-    s3: {
-      region: env.FILES_S3_REGION ?? env.AWS_REGION ?? "us-east-1",
-      endpoint: env.FILES_S3_ENDPOINT || undefined,
-      forcePathStyle: env.FILES_S3_FORCE_PATH_STYLE === "true",
-      ...(env.FILES_S3_ACCESS_KEY_ID && env.FILES_S3_SECRET_ACCESS_KEY
+    r2Bucket: env.R2_BUCKET,
+    r2: {
+      region: "auto",
+      ...(env.R2_ACCOUNT_ID
+        ? { endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` }
+        : {}),
+      forcePathStyle: true,
+      ...(env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY
         ? {
             credentials: {
-              accessKeyId: env.FILES_S3_ACCESS_KEY_ID,
-              secretAccessKey: env.FILES_S3_SECRET_ACCESS_KEY,
+              accessKeyId: env.R2_ACCESS_KEY_ID,
+              secretAccessKey: env.R2_SECRET_ACCESS_KEY,
             },
           }
         : {}),
@@ -277,21 +276,21 @@ export function createDocumentStorage(config: StorageConfig): DocumentStorage {
     bucket: string | null,
   ): ObjectStore {
     if (provider === "local") return local;
-    if (provider !== "s3" || !bucket)
+    if (provider !== "r2" || !bucket)
       throw new FileApiError(
         503,
         "STORAGE_CONFIG",
         "The document storage location is not configured.",
       );
-    client ??= new S3Client(config.s3 ?? {});
-    return new S3ObjectStore(client, bucket);
+    client ??= new S3Client(config.r2 ?? {});
+    return new R2ObjectStore(client, bucket);
   }
   return {
     async put(key, content, mimeType) {
       const location: StorageLocation = {
         storageProvider: config.provider,
         storageBucket:
-          config.provider === "s3" ? (config.s3Bucket ?? null) : null,
+          config.provider === "r2" ? (config.r2Bucket ?? null) : null,
         storageKey: key,
       };
       await store(location.storageProvider, location.storageBucket).put(

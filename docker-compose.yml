@@ -1,0 +1,33 @@
+# Dokploy entrypoint: Dokploy runs `docker compose --env-file .env -f ./docker-compose.yml`
+# from the repo root and writes the Environment tab to ./.env. Traefik reaches the
+# app on the internal network, so no host port is published (the Dokploy panel
+# already uses 3000). Domain in Dokploy: service `app`, port 3000.
+# Local development uses gara-facile/docker-compose.yml instead.
+services:
+  app:
+    build: ./gara-facile
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Container paths; persisted in the volumes below.
+      DB_FILE_NAME: /app/data/gara.db
+      FILES_STORAGE_PROVIDER: ${FILES_STORAGE_PROVIDER:-local}
+      FILES_LOCAL_DIR: /app/var/uploads
+    expose:
+      - "3000"
+    volumes:
+      - gara-data:/app/data
+      - gara-uploads:/app/var/uploads
+    healthcheck:
+      # Home page only: /api/ai/health calls the model provider and spends rate limit.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+
+volumes:
+  gara-data:
+  gara-uploads:

@@ -33,7 +33,7 @@ La selección de documentos distingue contexto y documentación legal/fiscal. Ac
 
 ## API de archivos
 
-La API permite subir, listar, descargar y eliminar documentos de un perfil existente. El formulario ya la utiliza con su cookie privada y comprobación de pertenencia. Soporta disco local y buckets compatibles con S3, seleccionados por variables de entorno. Requiere Node.js 22 o posterior y una base migrada. `FILES_API_TOKEN` es opcional para acceso de operador o servidor a servidor. La configuración de ejemplo está en `.env.example`.
+La API permite subir, listar, descargar y eliminar documentos de un perfil existente. El formulario ya la utiliza con su cookie privada y comprobación de pertenencia. Soporta disco local y Cloudflare R2, seleccionados por variables de entorno. Requiere Node.js 22 o posterior y una base migrada. `FILES_API_TOKEN` es opcional para acceso de operador o servidor a servidor. La configuración de ejemplo está en `.env.example`.
 
 Consulta [docs/files-api.md](docs/files-api.md) para configuración, endpoints, ejemplos y comportamiento ante fallos. Las pruebas se ejecutan con `bun run test:files` y no necesitan credenciales cloud.
 

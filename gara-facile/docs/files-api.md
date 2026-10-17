@@ -27,30 +27,19 @@ FILES_LOCAL_DIR=./var/uploads
 
 Relative paths resolve from the app's working directory. The default directory is ignored by Git and is outside `public`. Use a persistent volume when deploying in a container. The server creates the directory on the first upload and needs read/write access. Keep it private and exclude it from static hosting and backups intended for public distribution.
 
-For AWS S3:
+For Cloudflare R2:
 
 ```dotenv
-FILES_STORAGE_PROVIDER=s3
-FILES_S3_BUCKET=company-documents
-FILES_S3_REGION=eu-west-1
-FILES_S3_FORCE_PATH_STYLE=false
+FILES_STORAGE_PROVIDER=r2
+R2_ACCOUNT_ID=your-account-id
+R2_ACCESS_KEY_ID=your-access-key
+R2_SECRET_ACCESS_KEY=your-secret-key
+R2_BUCKET=garefacile
 ```
 
-The SDK uses its default AWS credential chain, including IAM roles. Alternatively set both `FILES_S3_ACCESS_KEY_ID` and `FILES_S3_SECRET_ACCESS_KEY`. The bucket must already exist. The application performs object operations only and does not create buckets or change bucket permissions. Configure a private bucket and grant access to put, get and delete objects under `business-records/`.
+The endpoint is derived from the account ID (`https://<account>.r2.cloudflarestorage.com`, region `auto`, path style). The bucket must already exist. The application performs object operations only and does not create buckets or change bucket permissions. Use an R2 API token scoped to this bucket with object read and write. Keep the bucket private: documents are served through the API below, never from a public r2.dev URL. Optional checksum negotiation is disabled for compatibility; downloads still verify the stored length against metadata.
 
-For S3-compatible storage such as R2 or MinIO, also set:
-
-```dotenv
-FILES_S3_ENDPOINT=https://your-storage-endpoint.example
-FILES_S3_REGION=auto
-FILES_S3_FORCE_PATH_STYLE=true
-FILES_S3_ACCESS_KEY_ID=your-access-key
-FILES_S3_SECRET_ACCESS_KEY=your-secret-key
-```
-
-Use the region and path-style setting required by your provider. MinIO commonly uses `us-east-1` with path style; R2 commonly uses `auto`. Optional checksum negotiation is disabled for compatibility; downloads still verify the stored length against metadata.
-
-New uploads use `FILES_STORAGE_PROVIDER`. Each document records its provider and bucket, so old S3 objects remain readable when new uploads switch to local or another bucket. Keep the old bucket accessible with the configured S3 endpoint/credentials. Changing an endpoint or local root does not move old bytes. Use a separate data migration to relocate existing files. Additional providers can implement the same `DocumentStorage` interface.
+New uploads use `FILES_STORAGE_PROVIDER`. Each document records its provider and bucket, so old R2 objects remain readable when new uploads switch to local or another bucket. Keep the old bucket accessible with the same R2 credentials. Changing the bucket or local root does not move old bytes. Use a separate data migration to relocate existing files. Additional providers can implement the same `DocumentStorage` interface.
 
 ## Endpoints
 
@@ -104,9 +93,9 @@ Errors use `{ "error": { "code": "...", "message": "..." } }` with English messa
 
 ## Failure handling
 
-If storage succeeds but the database insert fails, the API attempts to remove the unregistered object. Cleanup failures are logged with the generated storage key for reconciliation. SQLite and object storage do not share a distributed transaction; a process crash or ambiguous S3 timeout can still leave an orphaned object.
+If storage succeeds but the database insert fails, the API attempts to remove the unregistered object. Cleanup failures are logged with the generated storage key for reconciliation. SQLite and object storage do not share a distributed transaction; a process crash or ambiguous R2 timeout can still leave an orphaned object.
 
-Deletion removes bytes before metadata. If storage fails, the metadata remains for retry. If the database delete then fails, repeating the deletion succeeds because storage deletion is idempotent. If a file is missing, download returns `404` and DELETE can still remove its stale metadata. S3 bucket versioning may retain historical versions according to bucket lifecycle rules.
+Deletion removes bytes before metadata. If storage fails, the metadata remains for retry. If the database delete then fails, repeating the deletion succeeds because storage deletion is idempotent. If a file is missing, download returns `404` and DELETE can still remove its stale metadata. R2 bucket versioning may retain historical versions according to bucket lifecycle rules.
 
 ## Verification
 
@@ -119,7 +108,7 @@ bun run build
 bun run test:files:http
 ```
 
-Tests use temporary directories and in-memory SQLite with the real migrations. They cover the local HTTP adapter, bearer auth, parent scoping, file signatures, bounded request bodies, concurrent quotas, failure cleanup, symlink/path escape rejection and downloads. The real AWS SDK is exercised against an in-process S3-compatible HTTP fixture, including a switch from S3 to local while preserving access to old objects. This does not constitute a live test against a configured cloud bucket.
+Tests use temporary directories and in-memory SQLite with the real migrations. They cover the local HTTP adapter, bearer auth, parent scoping, file signatures, bounded request bodies, concurrent quotas, failure cleanup, symlink/path escape rejection and downloads. The real AWS SDK is exercised against an in-process R2-compatible HTTP fixture, including a switch from R2 to local while preserving access to old objects. This does not constitute a live test against a configured cloud bucket.
 
 Profile tests cover draft persistence, approval, expiry, session ownership, same-origin mutations, browser-authorized document operations and protection of profiles already used for matching.
 
