@@ -19,9 +19,8 @@ for (const [tenderId, tender] of Object.entries(labels.tenders)) {
   test(`${tenderId}: labels cite the PDF and the matrix is ${tender.expectedVerdict}`, async () => {
     const { fixture, bytes } = await loadFixture(tenderId);
     const pages = await parsePdf(bytes);
-    const requirements = tender.requirements.map(
-      ({ expected: _expected, ...r }) => ({ ...r, confidence: 1 }) as Requirement,
-    );
+    // Extra label fields (expected) are ignored by the rules.
+    const requirements = tender.requirements.map((r) => ({ ...r, confidence: 1 }) as Requirement);
     for (const r of requirements)
       assert.equal(locateQuote(r.quote, r.page, pages), r.page, `${r.id} quote not on page ${r.page}`);
 
