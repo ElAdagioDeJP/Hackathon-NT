@@ -1,0 +1,48 @@
+{
+  "tenderId": "687674-2026",
+  "prompt": "extract.v2",
+  "stats": {
+    "windows": 7,
+    "failedWindows": 0,
+    "raw": 4,
+    "droppedNoQuote": 0,
+    "droppedBadValue": 1,
+    "duplicates": 0,
+    "ms": 53837,
+    "promptTokens": 45333,
+    "completionTokens": 593,
+    "model": "self-dploy/Gemma-4-31B-IT"
+  },
+  "requirements": [
+    {
+      "id": "execution_deadline-1",
+      "kind": "execution_deadline",
+      "description": "La fornitura e posa in opera delle attrezzature deve avvenire entro 60 giorni naturali e consecutivi dal verbale di avvio.",
+      "value": 60,
+      "unit": "days",
+      "page": 11,
+      "quote": "La fornitura e posa in opera delle attrezzature di cui al Cod F come specificato al paragrafo 1.6 dell’elaborato EL.02 _ CAPITOLATO SPECIALE D’APPALTO dovrà avvenire entro 60 giorni naturali e consecutivi decorrenti dal verbale di avvio della fornitura sottoscritto dal DEC e dall’appaltatore.",
+      "confidence": 0.5
+    },
+    {
+      "id": "min_turnover-1",
+      "kind": "min_turnover",
+      "description": "Fatturato globale maturato nei migliori tre anni degli ultimi cinque (2021-2025).",
+      "value": 800000,
+      "unit": "EUR",
+      "page": 15,
+      "quote": "L’operatore economico deve aver realizzato un fatturato globale maturato nei migliori tre (3) anni degli ultimi cinque (2021-2022-2023-2024-2025) precedenti a quello in cui è stata pubblicata la gara almeno pari ad € 800.000,00",
+      "confidence": 1
+    },
+    {
+      "id": "bid_guarantee-1",
+      "kind": "bid_guarantee",
+      "description": "Garanzia provvisoria pari al 2% del valore complessivo dell'appalto.",
+      "value": 0.02,
+      "unit": "%",
+      "page": 21,
+      "quote": "L’offerta è corredata, a pena di esclusione, da una garanzia provvisoria ex art. 53 comma 1, del D.lgs. n. 36/2023, pari al 2% del valore complessivo dell’appalto",
+      "confidence": 1
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "tenderId": "691579-2026",
+  "prompt": "extract.v2",
+  "stats": {
+    "windows": 8,
+    "failedWindows": 0,
+    "raw": 10,
+    "droppedNoQuote": 0,
+    "droppedBadValue": 0,
+    "duplicates": 0,
+    "ms": 81574,
+    "promptTokens": 60388,
+    "completionTokens": 1002,
+    "model": "self-dploy/Gemma-4-31B-IT"
+  },
+  "requirements": [
+    {
+      "id": "submission_deadline-1",
+      "kind": "submission_deadline",
+      "description": "Data scadenza per la presentazione dell'offerta.",
+      "value": "2026-11-09T09:00:00.000Z",
+      "page": 1,
+      "quote": "DATA SCADENZA 09.11.2026 Ore 10:00",
+      "confidence": 1
+    },
+    {
+      "id": "min_turnover-1",
+      "kind": "min_turnover",
+      "description": "Fatturato globale maturato nel triennio precedente.",
+      "value": 1000000,
+      "unit": "EUR",
+      "page": 16,
+      "quote": "Fatturato globale maturato nel triennio precedente almeno pari € 1.000.000,00 IVA esclusa",
+      "confidence": 0.5
+    },
+    {
+      "id": "min_turnover-2",
+      "kind": "min_turnover",
+      "description": "Fatturato relativo a servizi analoghi maturato nel triennio precedente.",
+      "value": 300000,
+      "unit": "EUR",
+      "page": 16,
+      "quote": "di cui almeno € 300.000,00 relativo ai servizi analoghi a quelli oggetto di appalto",
+      "confidence": 0.5
+    },
+    {
+      "id": "certification-1",
+      "kind": "certification",
+      "description": "Certificazione di qualità 9001:2015.",
+      "value": "ISO 9001:2015",
+      "page": 17,
+      "quote": "Certificazione di qualità 9001:2015",
+      "confidence": 0.5
+    },
+    {
+      "id": "certification-2",
+      "kind": "certification",
+      "description": "Certificazione di qualità ISO 27001:2022.",
+      "value": "ISO 27001:2022",
+      "page": 17,
+      "quote": "Certificazione di qualità ISO 27001:2022",
+      "confidence": 0.5
+    },
+    {
+      "id": "certification-3",
+      "kind": "certification",
+      "description": "Certificazione di qualità ISO 14001:2015.",
+      "value": "ISO 14001:2015",
+      "page": 17,
+      "quote": "Certificazione di qualità ISO 14001:2015",
+      "confidence": 0.5
+    },
+    {
+      "id": "certification-4",
+      "kind": "certification",
+      "description": "Certificazione etica SA8000.",
+      "value": "SA8000",
+      "page": 17,
+      "quote": "Certificazione etica SA8000",
+      "confidence": 0.5
+    },
+    {
+      "id": "similar_projects-1",
+      "kind": "similar_projects",
+      "description": "Esecuzione di servizi analoghi a favore di amministrazioni territoriali nel triennio 2022-2024.",
+      "value": 5,
+      "unit": "count",
+      "page": 17,
+      "quote": "Esecuzione nel triennio 2022-2023-2024 di almeno n. 5 servizi analoghi a favore di amministrazioni territoriali",
+      "confidence": 0.5
+    },
+    {
+      "id": "bid_guarantee-1",
+      "kind": "bid_guarantee",
+      "description": "Garanzia provvisoria pari al 2% del valore complessivo dell'appalto.",
+      "value": 0.02,
+      "unit": "%",
+      "page": 21,
+      "quote": "L’offerta è corredata, a pena di esclusione, da una garanzia provvisoria pari al 2% del valore complessivo dell’appalto",
+      "confidence": 0.5
+    },
+    {
+      "id": "submission_deadline-2",
+      "kind": "submission_deadline",
+      "description": "Termine perentorio per la presentazione dell'offerta e della documentazione.",
+      "value": "2026-11-09T14:00:00.000Z",
+      "page": 23,
+      "quote": "L’offerta e la documentazione devono pervenire entro e non oltre il termine perentorio del 09.11.2026 Ore 10:00",
+      "confidence": 1
+    }
+  ]
+}

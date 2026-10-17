@@ -156,6 +156,51 @@ export const submissions = sqliteTable("submissions", {
   createdAt: integer("created_at").default(sql`(unixepoch())`),
 });
 
+// AI: one row per LLM call. Feeds the AMD panel (/api/ai/amd-stats).
+export const aiRuns = sqliteTable(
+  "ai_runs",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    role: text("role", { enum: ["extract", "draft"] }).notNull(),
+    model: text("model").notNull(),
+    ms: integer("ms").notNull(),
+    promptTokens: integer("prompt_tokens"),
+    completionTokens: integer("completion_tokens"),
+    ok: integer("ok", { mode: "boolean" }).notNull(),
+    error: text("error"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index("ai_runs_created_idx").on(table.createdAt)],
+);
+
+// Parsed tender PDFs, keyed by content hash so a file is parsed once.
+export const tenderDocuments = sqliteTable("tender_documents", {
+  hash: text("hash").primaryKey(),
+  tenderId: text("tender_id").notNull(),
+  source: text("source").notNull(),
+  pages: text("pages", { mode: "json" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// TenderAnalysis JSON until contract_matches is extended with backend.
+export const tenderAnalyses = sqliteTable(
+  "tender_analyses",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    tenderId: text("tender_id").notNull(),
+    businessRecordId: integer("business_record_id"),
+    analysis: text("analysis", { mode: "json" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index("tender_analyses_tender_idx").on(table.tenderId)],
+);
+
 // VIEWS
 export const wholeBusinessRecords = sqliteView("whole_business_records").as(
   (db) => {
