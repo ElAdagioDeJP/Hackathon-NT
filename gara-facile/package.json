@@ -15,7 +15,8 @@
     "db:check": "node scripts/check-migrations.mjs",
     "test:files": "tsx --test app/services/files/*.test.ts",
     "test:files:http": "node scripts/check-files-http.mjs",
-    "test:profiles": "tsx --test app/services/business/*.test.ts"
+    "test:profiles": "tsx --test app/services/business/*.test.ts",
+    "test:match": "tsx --test app/services/match/*.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",

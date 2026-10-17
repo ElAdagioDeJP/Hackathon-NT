@@ -15,6 +15,17 @@ export const contracts = sqliteTable("contracts", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   url: text("url").notNull(),
+  description: text("description"),
+  placeCountries: text("place_countries", { mode: "json" })
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
+  cpvCodes: text("cpv_codes", { mode: "json" })
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
+  deadline: text("deadline"),
+  buyerName: text("buyer_name"),
 });
 
 export const businesses = sqliteTable("businesses", {
@@ -129,8 +140,11 @@ export const contractMatches = sqliteTable("contract_matches", {
   businessRecordId: integer("business_record_id")
     .notNull()
     .references(() => businessRecords.id),
-  type: text("type", { enum: ["exact", "partial", "none"] }).default("none"),
-  score: integer("score").default(0),
+  type: text("type", { enum: ["exact", "partial", "none"] })
+    .notNull()
+    .default("none"),
+  score: integer("score").notNull().default(0),
+  rationale: text("rationale").notNull().default(""),
 });
 
 export const submissions = sqliteTable("submissions", {

@@ -208,7 +208,7 @@ test("profiles already referenced by matching cannot be silently overwritten", (
   try {
     const owner = f.service.save(undefined, complete, true, true);
     f.sqlite.exec(
-      `INSERT INTO contracts VALUES ('TED-1', 'Test', 'https://example.test'); INSERT INTO contract_matches (contract_id, business_record_id) VALUES ('TED-1', ${owner.saved.recordId});`,
+      `INSERT INTO contracts (id, title, url) VALUES ('TED-1', 'Test', 'https://example.test'); INSERT INTO contract_matches (contract_id, business_record_id) VALUES ('TED-1', ${owner.saved.recordId});`,
     );
     assert.throws(
       () =>
