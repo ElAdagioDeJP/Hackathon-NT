@@ -25,7 +25,7 @@ La interfaz está en inglés, incluidos los errores, ejemplos, países, textos d
 
 El resumen lateral refleja lo escrito. El indicador cuenta seis grupos de información completos y no estima la elegibilidad de la empresa. “Load example” introduce datos ficticios de Voltio Electrical para recorrer la interfaz.
 
-El formulario guarda el perfil mediante Server Actions al avanzar o pulsar “Save draft”. Al volver desde el mismo navegador, recupera los datos y documentos guardados. “Confirm profile” valida los datos completos y registra la aprobación; todavía no ejecuta análisis con IA ni matches.
+El formulario guarda el perfil mediante Server Actions al avanzar o pulsar “Save draft”. Al volver desde el mismo navegador, recupera los datos y documentos guardados. “Confirm profile” valida los datos completos y registra la aprobación. Tras aprobar, “Find matches” consulta TED, llama al agente de Matching en Evolus y guarda el ledger de matches. Configura `EU_API_KEY` y las variables `EVOLUS_*` (ver [docs/matching-agent.md](docs/matching-agent.md)).
 
 Una cookie HttpOnly vincula el navegador con su perfil durante 30 días. La base solo guarda el hash de ese identificador. Es acceso anónimo por navegador, no una cuenta de usuario: no hay login ni recuperación desde otro dispositivo. El token de operador de archivos nunca llega al navegador.
 
@@ -79,6 +79,7 @@ bun run lint
 bun run build
 bun run db:check
 bun run test:profiles
+bun run test:match
 bun run test:files
 bun run test:files:http
 ```

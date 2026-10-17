@@ -18,8 +18,8 @@ for (const populated of [false, true]) {
     sqlite.exec(`
       INSERT INTO businesses (id, name, email, phone, country, city) VALUES (1, 'Existing business', 'contact@example.test', '123', 'ESP', 'Valencia');
       INSERT INTO business_records (id, business_id) VALUES (1, 1);
-      INSERT INTO contracts VALUES ('TED-1', 'Existing opportunity', 'https://example.test');
-      INSERT INTO contract_matches VALUES (1, 'TED-1', 1, 'partial', 50);
+      INSERT INTO contracts (id, title, url) VALUES ('TED-1', 'Existing opportunity', 'https://example.test');
+      INSERT INTO contract_matches (id, contract_id, business_record_id, type, score, rationale) VALUES (1, 'TED-1', 1, 'partial', 50, 'Baseline match');
       INSERT INTO submissions VALUES (1, 1, X'0102', 123);
       CREATE TABLE __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric);
     `);

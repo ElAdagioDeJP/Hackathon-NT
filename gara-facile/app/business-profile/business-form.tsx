@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { saveBusinessProfile } from "./actions";
+import { MatchPanel } from "./match-panel";
 import {
   COUNTRY_OPTIONS,
   EMPTY_PROFILE,
@@ -441,7 +442,7 @@ export default function BusinessForm({
       setReviewed(result.saved.status === "approved");
       setNotice(
         approve
-          ? "Your profile has been saved and approved. Matching has not started yet."
+          ? "Your profile has been saved and approved. You can Find matches when ready."
           : "Draft saved. You can continue in this browser.",
       );
       return true;
@@ -1034,10 +1035,11 @@ export default function BusinessForm({
                             <p>
                               Your business details and documents have been
                               saved. You can return in this browser to review
-                              them. Matching has not started yet.
+                              them, or run Find matches below.
                             </p>
                           </div>
                         ) : null}
+                        <MatchPanel enabled={reviewed} />
                         <dl className="review-list">
                           <div>
                             <dt className="review-edit">

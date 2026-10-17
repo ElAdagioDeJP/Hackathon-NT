@@ -714,6 +714,77 @@ fieldset.field legend {
 .success-panel p {
   color: var(--navy);
 }
+.match-panel {
+  margin: 0 0 28px;
+  padding: 24px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+}
+.match-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.match-panel h2 {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+.match-panel-header p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 42ch;
+}
+.match-error {
+  color: var(--danger, #9b1c1c);
+  margin: 0 0 12px;
+}
+.match-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+.match-item {
+  padding: 0 0 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+}
+.match-item-top {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.match-type {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 600;
+}
+.match-type-exact {
+  color: var(--success);
+}
+.match-type-partial {
+  color: var(--navy);
+}
+.match-score {
+  font-size: 13px;
+  color: var(--muted);
+}
+.match-title {
+  color: var(--navy);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.match-rationale {
+  margin: 8px 0 0;
+  color: var(--navy);
+  line-height: 1.45;
+}
 .bottom-note {
   display: flex;
   justify-content: space-between;
