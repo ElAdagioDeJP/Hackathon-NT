@@ -1,0 +1,103 @@
+{
+  "tenderId": "629600-2026",
+  "prompt": "extract.v1",
+  "stats": {
+    "windows": 6,
+    "failedWindows": 0,
+    "raw": 10,
+    "droppedNoQuote": 0,
+    "droppedBadValue": 1,
+    "duplicates": 0,
+    "ms": 32389,
+    "promptTokens": 31709,
+    "completionTokens": 1046,
+    "model": "self-dploy/Gemma-4-31B-IT"
+  },
+  "requirements": [
+    {
+      "id": "execution_deadline-1",
+      "kind": "execution_deadline",
+      "description": "Il contratto avrà una durata di 60 mesi.",
+      "value": 1800,
+      "unit": "days",
+      "page": 2,
+      "quote": "Il relativo contratto avrà una durata di 60 mesi.",
+      "confidence": 0.5
+    },
+    {
+      "id": "certification-1",
+      "kind": "certification",
+      "description": "Essere Partner certificati Oracle per gli ambiti oggetto dell’affidamento.",
+      "value": "Partner certificati Oracle",
+      "page": 9,
+      "quote": "essere Partner certificati Oracle per gli ambiti oggetto dell’affidamento",
+      "confidence": 1
+    },
+    {
+      "id": "certification-2",
+      "kind": "certification",
+      "description": "Essere Partner certificati Microsoft.",
+      "value": "Partner certificati Microsoft",
+      "page": 10,
+      "quote": "essere Partner certificati Microsoft",
+      "confidence": 1
+    },
+    {
+      "id": "min_turnover-1",
+      "kind": "min_turnover",
+      "description": "Fatturato globale annuo non inferiore nei migliori tre anni degli ultimi cinque anni.",
+      "value": 25200000,
+      "unit": "EUR",
+      "page": 10,
+      "quote": "aver conseguito un fatturato globale annuo non inferiore, nei migliori tre anni degli ultimi cinque anni precedenti a quello di indizione della procedura, a Euro 25.200.000,00 IVA esclusa",
+      "confidence": 1
+    },
+    {
+      "id": "similar_projects-1",
+      "kind": "similar_projects",
+      "description": "Servizi analoghi e di complessità simile ultimati negli ultimi dieci anni, importo complessivo cumulativo.",
+      "value": 21000000,
+      "unit": "EUR",
+      "page": 10,
+      "quote": "aver conseguito ed ultimato con buon esito, negli ultimi dieci anni dalla data di indizione della presente procedura, servizi di importo complessivo pari ad almeno € 21.000.000,00 IVA esclusa",
+      "confidence": 1
+    },
+    {
+      "id": "bid_guarantee-1",
+      "kind": "bid_guarantee",
+      "description": "Garanzia provvisoria pari al 2% dell'importo posto a base d'asta.",
+      "value": 0.02,
+      "unit": "%",
+      "page": 11,
+      "quote": "Le offerte presentate dai concorrenti devono essere corredate da una garanzia provvisoria pari al 2% dell’importo posto a base d’asta",
+      "confidence": 1
+    },
+    {
+      "id": "submission_deadline-1",
+      "kind": "submission_deadline",
+      "description": "Termine ultimo per la presentazione delle offerte.",
+      "value": "2026-11-15T23:59:59.000Z",
+      "page": 16,
+      "quote": "Le offerte, redatte in lingua italiana e complete della relativa documentazione devono essere presentate, a pena di esclusione dalla gara, entro e non oltre il giorno 15 novembre 2026",
+      "confidence": 0.95
+    },
+    {
+      "id": "certification-3",
+      "kind": "certification",
+      "description": "Certificazione ISO 9001:2015",
+      "value": "ISO 9001:2015",
+      "page": 27,
+      "quote": "I.1 Certificazione ISO 9001 :2015",
+      "confidence": 1
+    },
+    {
+      "id": "certification-4",
+      "kind": "certification",
+      "description": "Certificazione ISO/IEC 27001:2022",
+      "value": "ISO/IEC 27001:2022",
+      "page": 27,
+      "quote": "I.2 Certificazione ISO/IEC 27001:2022",
+      "confidence": 1
+    }
+  ]
+}

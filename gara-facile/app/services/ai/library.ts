@@ -1,7 +1,7 @@
 // Server-only: uploads company knowledge to the Evolus library (EVOLUS_LIBRARY_ID).
 import { createHash } from "node:crypto";
 import { EvolusApiError } from "../match/evolus";
-import type { CompanyFacts } from "./_contract.mock";
+import type { CompanyFacts } from "./types";
 import { evolusRequest, type EvolusDeps } from "./evolus";
 
 // From GET /memories/document-formats; other files are skipped, not sent.
