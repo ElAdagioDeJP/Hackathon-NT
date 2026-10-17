@@ -7,7 +7,10 @@ import { EXTRACT_SYSTEM, extractUserPrompt } from "./prompts/extract.v1";
 import { REQUIREMENT_KINDS, type Requirement, type RequirementKind, type TenderPage } from "./types";
 
 export const WINDOW_PAGES = 7;
-export const CONCURRENCY = 4;
+// AMD Token Factory allows 8 concurrent requests and 20 RPM per team key.
+export const CONCURRENCY = 3;
+// Thinking models spend part of the budget reasoning before the JSON.
+export const MAX_TOKENS = 16_000;
 
 const rawRequirement = z.object({
   kind: z.enum(REQUIREMENT_KINDS as [RequirementKind, ...RequirementKind[]]),
@@ -117,6 +120,7 @@ export async function extractRequirements(
       role: "extract",
       schema: extractionSchema,
       schemaName: "requirements",
+      maxTokens: MAX_TOKENS,
       signal: options.signal,
       messages: [
         { role: "system", content: EXTRACT_SYSTEM },

@@ -17,8 +17,10 @@ const reply = (content: string, status = 200) =>
 function harness(responses: (() => Response | Promise<Response>)[]) {
   const calls: { url: string; body: Record<string, unknown>; auth?: string }[] = [];
   const runs: AiRun[] = [];
+  const waits: number[] = [];
   const client = createLlmClient({
     endpoint,
+    sleep: async (ms) => void waits.push(ms),
     record: (run) => void runs.push(run),
     fetch: (async (url: string, init: RequestInit) => {
       const headers = init.headers as Record<string, string> | undefined;
@@ -30,7 +32,7 @@ function harness(responses: (() => Response | Promise<Response>)[]) {
       return responses[calls.length - 1]();
     }) as typeof fetch,
   });
-  return { client, calls, runs };
+  return { client, calls, runs, waits };
 }
 
 test("validates JSON against the schema and records the run", async () => {
@@ -59,6 +61,24 @@ test("retries once on 5xx, then fails and records the error", async () => {
   await assert.rejects(bad.client.chat({ role: "draft", messages: [] }), /HTTP 503/);
   assert.equal(bad.calls.length, 2);
   assert.equal(bad.runs[0].ok, false);
+});
+
+test("honors Retry-After on 429 and sends reasoning effort", async () => {
+  const h = harness([
+    () => new Response("slow down", { status: 429, headers: { "retry-after": "7" } }),
+    () => reply("ok"),
+  ]);
+  assert.equal((await h.client.chat({ role: "draft", messages: [] })).data, "ok");
+  assert.deepEqual(h.waits, [7000]);
+
+  const r = createLlmClient({
+    endpoint: () => ({ ...endpoint(), reasoningEffort: "low" }),
+    fetch: (async (_url: string, init: RequestInit) => {
+      assert.equal(JSON.parse(String(init.body)).reasoning_effort, "low");
+      return reply("x");
+    }) as typeof fetch,
+  });
+  await r.chat({ role: "extract", messages: [] });
 });
 
 test("does not retry client errors", async () => {

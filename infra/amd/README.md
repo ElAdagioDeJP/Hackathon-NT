@@ -1,6 +1,31 @@
-# AMD MI300X inference (vLLM)
+# AMD inference
 
-Two OpenAI-compatible servers on one MI300X droplet (AMD Developer Cloud):
+## Primary: AMD Token Factory (no droplet needed)
+
+The hackathon team key (`rc-…`, redeemed at notebooks.amd.com/tokenfactory) gives free
+OpenAI-compatible endpoints running on AMD GPUs. The app only needs `.env`:
+
+```
+LLM_EXTRACT_BASE_URL=https://developer.amd.com.cn/radeon/api/v1
+LLM_EXTRACT_MODEL=Qwen3.8-27B
+LLM_EXTRACT_REASONING_EFFORT=low
+LLM_DRAFT_BASE_URL=https://developer.amd.com.cn/radeon/api/v1
+LLM_DRAFT_MODEL=Gemma-4-31B-IT
+LLM_EXTRACT_API_KEY / LLM_DRAFT_API_KEY = the team key
+```
+
+Gate checked on 2026-10-17: Gemma-4-31B-IT chat and `json_schema`, Qwen3.8-27B
+`json_schema` and tool calling all returned 200; requests without the key return 401.
+
+Limits are **per team key** (shared by all 6 members): 20 RPM, 8 concurrent requests,
+$1/day spend cap (resets 16:00 UTC = 12:00 VET). Check with
+`curl $BASE/usage -H "Authorization: Bearer $KEY"`. Qwen models think even at
+`reasoning_effort=low`, so keep `max_tokens` generous. Use `GET /v1/models` for the live catalog.
+
+## Fallback: own MI300X droplet (vLLM)
+
+Only if Token Factory is down or rate limits block the demo. Needs droplet credits, which
+the team account does not have yet. Two OpenAI-compatible servers on one MI300X droplet (AMD Developer Cloud):
 
 | Port | Model | Role | VRAM |
 |---|---|---|---|

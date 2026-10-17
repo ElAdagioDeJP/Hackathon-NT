@@ -38,6 +38,7 @@ export interface Endpoint {
   baseUrl: string;
   model: string;
   apiKey: string;
+  reasoningEffort?: string; // e.g. "low" for thinking models on AMD Token Factory
 }
 
 export class LlmError extends Error {
@@ -50,7 +51,9 @@ export class LlmError extends Error {
   }
 }
 
-export const TIMEOUT_MS = 60_000;
+export const TIMEOUT_MS = 120_000;
+// Never wait longer than this for a 429 Retry-After before the single retry.
+export const MAX_RETRY_WAIT_MS = 60_000;
 
 export function endpointFor(
   role: LlmRole,
@@ -61,10 +64,12 @@ export function endpointFor(
   const model = env[`${prefix}_MODEL`];
   if (!baseUrl || !model)
     throw new LlmError(`${prefix}_BASE_URL and ${prefix}_MODEL must be set.`);
+  const reasoningEffort = env[`${prefix}_REASONING_EFFORT`];
   return {
     baseUrl: baseUrl.replace(/\/+$/, ""),
     model,
     apiKey: env[`${prefix}_API_KEY`] ?? "",
+    ...(reasoningEffort ? { reasoningEffort } : {}),
   };
 }
 
@@ -76,26 +81,38 @@ function parseJson(content: string) {
 
 const retryable = (status: number) => status === 429 || status >= 500;
 
+// 429s carry Retry-After (seconds); 5xx and network errors retry after 1 s.
+function retryDelayMs(res?: Response) {
+  const header = Number(res?.headers.get("retry-after"));
+  if (res?.status === 429 && Number.isFinite(header) && header > 0)
+    return Math.min(header * 1000, MAX_RETRY_WAIT_MS);
+  return 1000;
+}
+
 export function createLlmClient(deps: {
   fetch?: typeof fetch;
   record?: (run: AiRun) => void | Promise<void>;
   endpoint?: (role: LlmRole) => Endpoint;
   timeoutMs?: number;
+  sleep?: (ms: number) => Promise<void>;
 } = {}) {
   const doFetch = deps.fetch ?? fetch;
   const endpoint = deps.endpoint ?? ((role: LlmRole) => endpointFor(role));
-  const timeoutMs = deps.timeoutMs ?? TIMEOUT_MS;
+  const timeoutMs = deps.timeoutMs ?? (Number(process.env.LLM_TIMEOUT_MS) || TIMEOUT_MS);
+  const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
 
   async function post(url: string, init: RequestInit, signal?: AbortSignal) {
     for (let attempt = 0; ; attempt++) {
       const timeout = AbortSignal.timeout(timeoutMs);
       const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+      let res: Response | undefined;
       try {
-        const res = await doFetch(url, { ...init, signal: combined });
+        res = await doFetch(url, { ...init, signal: combined });
         if (res.ok || attempt > 0 || !retryable(res.status)) return res;
       } catch (error) {
         if (signal?.aborted || attempt > 0) throw error;
       }
+      await sleep(retryDelayMs(res));
     }
   }
 
@@ -110,6 +127,7 @@ export function createLlmClient(deps: {
         temperature: options.temperature ?? (options.schema ? 0 : 0.4),
       };
       if (options.maxTokens) body.max_tokens = options.maxTokens;
+      if (target.reasoningEffort) body.reasoning_effort = target.reasoningEffort;
       if (options.schema)
         body.response_format = {
           type: "json_schema",
