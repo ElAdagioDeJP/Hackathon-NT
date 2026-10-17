@@ -1,5 +1,7 @@
 # Gara Facile — Guía para los 2 desarrolladores de IA
 
+> **División vigente por persona (JP):** ver [`division-ai/`](division-ai/GENERAL.md). Donde este documento dice "Dev A / Dev B", manda la asignación de esa carpeta.
+
 Alcance: **todo el apartado de IA** (infra AMD, modelos, extracción, reglas/matriz, borrador, Evolus, benchmark). El resto del equipo hace UI, deploy (Dokploy → `garefacile.empovaro.com`), video y slides.
 
 > Deadline duro: **18 oct 10:00 AM (hora Venezuela)**. Pitch 11:00 AM. Ver horario en la sección 7.
