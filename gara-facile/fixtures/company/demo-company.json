@@ -1,0 +1,44 @@
+{
+  "businessRecordId": 0,
+  "name": "Nordest Software S.r.l.",
+  "country": "IT",
+  "city": "Padova",
+  "offerings": "Custom software development, cloud migration and maintenance of web platforms for public administrations and SMEs.",
+  "cpvCodes": ["72000000", "72212000", "72260000", "72267000"],
+  "certifications": [
+    { "name": "ISO 9001:2015", "expiresAt": "2027-06-30", "hasDocument": true }
+  ],
+  "languages": ["it", "en"],
+  "annualTurnover": [
+    { "year": 2023, "amountEur": 1150000 },
+    { "year": 2024, "amountEur": 1320000 },
+    { "year": 2025, "amountEur": 1480000 }
+  ],
+  "employees": 18,
+  "isSme": true,
+  "bidGuaranteeCapacityEur": 60000,
+  "maxExecutionDays": 240,
+  "referenceProjects": [
+    {
+      "name": "Portale servizi online per i cittadini",
+      "client": "Comune di Esempio Nord (fictional)",
+      "year": 2024,
+      "valueEur": 185000,
+      "isPublic": true
+    },
+    {
+      "name": "Gestionale protocollo documentale",
+      "client": "Azienda Sanitaria Esempio Est (fictional)",
+      "year": 2023,
+      "valueEur": 240000,
+      "isPublic": true
+    },
+    {
+      "name": "App prenotazione sportelli",
+      "client": "Consorzio Servizi Esempio (fictional)",
+      "year": 2025,
+      "valueEur": 95000,
+      "isPublic": true
+    }
+  ]
+}
