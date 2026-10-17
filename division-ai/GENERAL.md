@@ -3,7 +3,7 @@
 > **Deadline duro: 18 oct, 10:00 AM (hora Venezuela, UTC-4).** Pitch 11:00 AM.
 > **Congelar funciones: 18 oct, 04:00 AM VET.** Desde ahí solo se arreglan errores.
 > Tareas de cada uno: [`JP.md`](JP.md) · [`EVOLUS.md`](EVOLUS.md). Contexto general del equipo: [`../TASKS.md`](../TASKS.md). Detalle técnico de IA: [`../AI_DEVELOPERS.md`](../AI_DEVELOPERS.md).
-> Linear: equipo **Balanzo**, proyecto **"Gara Facile — IA + Evolus"** (JP = *el sincero*, JP = *El Sincero*).
+> Linear: equipo **Balanzo**, proyecto [**"Gara Facile — IA + Evolus"**](https://linear.app/nextec-plus/project/gara-facile-ia-evolus-7dcc6e31946b) (JP = *El Sincero*: BAL-92…100; JP = *El Sincero*: BAL-101…111). Cada issue tiene sub-issues con los pasos.
 
 ## 1. Qué hacemos nosotros (y qué no)
 
