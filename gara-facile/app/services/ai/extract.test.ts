@@ -60,3 +60,20 @@ test("drops unquoted or hallucinated requirements, normalizes and dedupes", asyn
   assert.equal(stats.droppedBadValue, 1);
   assert.equal(stats.duplicates, 1);
 });
+
+test("a failed window is skipped; all windows failing rethrows", async () => {
+  let call = 0;
+  const flaky = (async () => {
+    if (call++ === 0) throw new Error("timeout");
+    return { content: "", data: { requirements: [] }, model: "qwen", ms: 1 };
+  }) as never;
+  const many = Array.from({ length: 14 }, (_, i) => ({ page: i + 1, text: "testo di prova della pagina", needsOcr: false }));
+  const { stats } = await extractRequirements(many, { chat: flaky });
+  assert.equal(stats.windows, 2);
+  assert.equal(stats.failedWindows, 1);
+
+  const broken = (async () => {
+    throw new Error("down");
+  }) as never;
+  await assert.rejects(extractRequirements(many, { chat: broken }), /down/);
+});

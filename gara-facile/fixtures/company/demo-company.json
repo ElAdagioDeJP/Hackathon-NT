@@ -17,7 +17,7 @@
   "employees": 18,
   "isSme": true,
   "bidGuaranteeCapacityEur": 60000,
-  "maxExecutionDays": 240,
+  "maxExecutionDays": 60,
   "referenceProjects": [
     {
       "name": "Portale servizi online per i cittadini",

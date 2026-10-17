@@ -1,7 +1,7 @@
 {
   "labeledBy": "JP (hand-labeled from the disciplinare PDFs)",
   "labeledAt": "2026-10-17",
-  "company": "app/services/ai/mocks/demoCompany.ts",
+  "company": "fixtures/company/demo-company.json",
   "tenders": {
     "691579-2026": {
       "expectedVerdict": "NO_GO",
@@ -10,7 +10,7 @@
         { "id": "691579-specific", "kind": "similar_projects", "value": 300000, "unit": "EUR", "page": 16, "description": "Fatturato complessivo per servizi analoghi", "quote": "cui almeno € 300.000,00 relativo ai servizi analoghi a quelli oggetto di appalto", "expected": "MEETS" },
         { "id": "691579-similar", "kind": "similar_projects", "value": 5, "unit": "count", "page": 17, "description": "Almeno 5 servizi analoghi nel triennio 2022-2024", "quote": "Esecuzione nel triennio 2022-2023-2024 di almeno n. 5 servizi analoghi", "expected": "FAILS" },
         { "id": "691579-iso9001", "kind": "certification", "value": "ISO 9001", "page": 17, "description": "Certificazione di qualità 9001", "quote": "Certificazione di qualità 9001:2015", "expected": "MEETS" },
-        { "id": "691579-iso27001", "kind": "certification", "value": "ISO 27001", "page": 17, "description": "Certificazione ISO 27001", "quote": "Certificazione di qualità ISO 27001:2022", "expected": "MEETS" },
+        { "id": "691579-iso27001", "kind": "certification", "value": "ISO 27001", "page": 17, "description": "Certificazione ISO 27001", "quote": "Certificazione di qualità ISO 27001:2022", "expected": "FAILS" },
         { "id": "691579-iso14001", "kind": "certification", "value": "ISO 14001", "page": 17, "description": "Certificazione ISO 14001", "quote": "Certificazione di qualità ISO 14001:2015", "expected": "FAILS" },
         { "id": "691579-sa8000", "kind": "certification", "value": "SA8000", "page": 17, "description": "Certificazione etica SA8000", "quote": "Certificazione etica SA8000", "expected": "FAILS" },
         { "id": "691579-guarantee", "kind": "bid_guarantee", "value": 0.02, "unit": "%", "page": 21, "description": "Garanzia provvisoria 2% del valore complessivo", "quote": "garanzia provvisoria pari al 2% del valore", "expected": "MEETS" }

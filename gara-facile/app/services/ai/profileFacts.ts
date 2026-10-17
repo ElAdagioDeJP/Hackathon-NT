@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { CompanyFacts } from "./_contract.mock";
+import type { CompanyFacts } from "./types";
 import demoJson from "../../../fixtures/company/demo-company.json";
 
 export interface ProfileFactsInput {

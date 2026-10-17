@@ -92,6 +92,7 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 
 export interface ExtractionStats {
   windows: number;
+  failedWindows: number;
   raw: number;
   droppedNoQuote: number;
   droppedBadValue: number;
@@ -109,13 +110,15 @@ export async function extractRequirements(
   const chat = options.chat ?? defaultChat;
   const started = performance.now();
   const stats: ExtractionStats = {
-    windows: 0, raw: 0, droppedNoQuote: 0, droppedBadValue: 0, duplicates: 0, ms: 0,
+    windows: 0, failedWindows: 0, raw: 0, droppedNoQuote: 0, droppedBadValue: 0, duplicates: 0, ms: 0,
     promptTokens: 0, completionTokens: 0,
   };
   const groups = windows(pages);
   stats.windows = groups.length;
 
+  let lastError: unknown;
   const perWindow = await mapLimit(groups, CONCURRENCY, async (group) => {
+    // One slow or malformed window must not lose the whole tender.
     const out = await chat({
       role: "extract",
       schema: extractionSchema,
@@ -126,12 +129,20 @@ export async function extractRequirements(
         { role: "system", content: EXTRACT_SYSTEM },
         { role: "user", content: extractUserPrompt(group) },
       ],
+    }).catch((error: unknown) => {
+      if (options.signal?.aborted) throw error;
+      stats.failedWindows++;
+      lastError = error;
+      return null;
     });
+    if (!out) return [];
     stats.promptTokens += out.promptTokens ?? 0;
     stats.completionTokens += out.completionTokens ?? 0;
     stats.model = out.model;
     return out.data.requirements.map((r) => ({ raw: r, group }));
   });
+
+  if (groups.length > 0 && stats.failedWindows === groups.length) throw lastError;
 
   const best = new Map<string, Requirement>();
   for (const { raw, group } of perWindow.flat()) {

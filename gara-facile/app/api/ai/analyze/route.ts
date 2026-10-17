@@ -1,6 +1,6 @@
 import { AnalyzeError, analyzeTender, saveAnalysis } from "@/app/services/ai/analyze";
-import { DEMO_COMPANY } from "@/app/services/ai/mocks/demoCompany";
 import { LlmError } from "@/app/services/ai/llm";
+import { getCompanyFacts } from "@/app/services/ai/profileFacts";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -14,9 +14,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "tenderId is required." }, { status: 400 });
   const businessRecordId =
     typeof body.businessRecordId === "number" ? body.businessRecordId : undefined;
-  // TODO: resolve businessRecordId through ai/profileFacts.ts.
-  const company = DEMO_COMPANY;
   try {
+    // No profile → demo company (fixtures/company/demo-company.json).
+    const company = await getCompanyFacts(businessRecordId);
     const { analysis, requirements, stats } = await analyzeTender({
       tenderId: body.tenderId,
       company,

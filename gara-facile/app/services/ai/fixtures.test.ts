@@ -7,8 +7,8 @@ import { test } from "node:test";
 import labels from "../../../fixtures/eval/labels.json";
 import { loadFixture } from "./analyze";
 import { locateQuote } from "./extract";
-import { DEMO_COMPANY } from "./mocks/demoCompany";
 import { parsePdf } from "./pdf";
+import { demoCompanyFacts } from "./profileFacts";
 import { evaluateAll } from "./rules";
 import { score, verdict } from "./scoring";
 import type { Requirement } from "./types";
@@ -24,7 +24,7 @@ for (const [tenderId, tender] of Object.entries(labels.tenders)) {
     for (const r of requirements)
       assert.equal(locateQuote(r.quote, r.page, pages), r.page, `${r.id} quote not on page ${r.page}`);
 
-    const results = evaluateAll(requirements, DEMO_COMPANY, {
+    const results = evaluateAll(requirements, demoCompanyFacts(), {
       tenderId,
       estimatedValueEur: fixture.estimatedValueEur,
       now,
