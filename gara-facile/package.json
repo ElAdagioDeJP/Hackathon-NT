@@ -14,6 +14,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "node scripts/check-migrations.mjs",
     "test:files": "tsx --test app/services/files/*.test.ts",
+    "test:ai": "tsx --test app/services/ai/*.test.ts",
     "test:files:http": "node scripts/check-files-http.mjs",
     "test:profiles": "tsx --test app/services/business/*.test.ts"
   },
