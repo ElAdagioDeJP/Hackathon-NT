@@ -1,28 +1,28 @@
 {
   "tenderId": "687674-2026",
-  "prompt": "extract.v1",
+  "prompt": "extract.v2",
   "stats": {
     "windows": 7,
     "failedWindows": 0,
-    "raw": 6,
+    "raw": 4,
     "droppedNoQuote": 0,
     "droppedBadValue": 1,
     "duplicates": 0,
-    "ms": 32125,
-    "promptTokens": 44185,
-    "completionTokens": 815,
+    "ms": 53837,
+    "promptTokens": 45333,
+    "completionTokens": 593,
     "model": "self-dploy/Gemma-4-31B-IT"
   },
   "requirements": [
     {
       "id": "execution_deadline-1",
       "kind": "execution_deadline",
-      "description": "La fornitura e posa in opera delle attrezzature deve avvenire entro 60 giorni naturali e consecutivi.",
+      "description": "La fornitura e posa in opera delle attrezzature deve avvenire entro 60 giorni naturali e consecutivi dal verbale di avvio.",
       "value": 60,
       "unit": "days",
       "page": 11,
-      "quote": "La fornitura e posa in opera delle attrezzature di cui al Cod F come specificato al paragrafo 1.6 dell’elaborato EL.02 _ CAPITOLATO SPECIALE D’APPALTO dovrà avvenire entro 60 giorni naturali e consecutivi",
-      "confidence": 1
+      "quote": "La fornitura e posa in opera delle attrezzature di cui al Cod F come specificato al paragrafo 1.6 dell’elaborato EL.02 _ CAPITOLATO SPECIALE D’APPALTO dovrà avvenire entro 60 giorni naturali e consecutivi decorrenti dal verbale di avvio della fornitura sottoscritto dal DEC e dall’appaltatore.",
+      "confidence": 0.5
     },
     {
       "id": "min_turnover-1",
@@ -42,24 +42,6 @@
       "unit": "%",
       "page": 21,
       "quote": "L’offerta è corredata, a pena di esclusione, da una garanzia provvisoria ex art. 53 comma 1, del D.lgs. n. 36/2023, pari al 2% del valore complessivo dell’appalto",
-      "confidence": 1
-    },
-    {
-      "id": "certification-1",
-      "kind": "certification",
-      "description": "Certificazione di qualità conforme alle norme europee della serie UNI CEI ISO 9000 per ottenere una riduzione della garanzia.",
-      "value": "UNI CEI ISO 9000",
-      "page": 22,
-      "quote": "Riduzione del 30% in caso di possesso della certificazione di qualità conforme alle norme europee della serie UNI CEI ISO 9000.",
-      "confidence": 1
-    },
-    {
-      "id": "certification-2",
-      "kind": "certification",
-      "description": "Certificazione della parità di genere UNI/PdR 125:2022 per l'attribuzione di punteggio premiale.",
-      "value": "UNI/PdR 125:2022",
-      "page": 38,
-      "quote": "Comprova: Fornire copia/e conforme/i della/e certificazione/i UNI/PdR 125:2022.",
       "confidence": 1
     }
   ]

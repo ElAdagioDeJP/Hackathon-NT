@@ -1,16 +1,16 @@
 {
   "tenderId": "691579-2026",
-  "prompt": "extract.v1",
+  "prompt": "extract.v2",
   "stats": {
     "windows": 8,
     "failedWindows": 0,
-    "raw": 12,
+    "raw": 10,
     "droppedNoQuote": 0,
     "droppedBadValue": 0,
     "duplicates": 0,
-    "ms": 41233,
-    "promptTokens": 59076,
-    "completionTokens": 1215,
+    "ms": 81574,
+    "promptTokens": 60388,
+    "completionTokens": 1002,
     "model": "self-dploy/Gemma-4-31B-IT"
   },
   "requirements": [
@@ -36,7 +36,7 @@
     {
       "id": "min_turnover-2",
       "kind": "min_turnover",
-      "description": "Fatturato relativo ai servizi analoghi maturato nel triennio precedente.",
+      "description": "Fatturato relativo a servizi analoghi maturato nel triennio precedente.",
       "value": 300000,
       "unit": "EUR",
       "page": 16,
@@ -82,7 +82,7 @@
     {
       "id": "similar_projects-1",
       "kind": "similar_projects",
-      "description": "Esecuzione di almeno 5 servizi analoghi a favore di amministrazioni territoriali nel triennio 2022-2024.",
+      "description": "Esecuzione di servizi analoghi a favore di amministrazioni territoriali nel triennio 2022-2024.",
       "value": 5,
       "unit": "count",
       "page": 17,
@@ -100,30 +100,12 @@
       "confidence": 0.5
     },
     {
-      "id": "certification-5",
-      "kind": "certification",
-      "description": "Certificazione di qualità conforme alle norme europee della serie UNI CEI ISO 9000 per ottenere una riduzione della garanzia provvisoria.",
-      "value": "UNI CEI ISO 9000",
-      "page": 22,
-      "quote": "Riduzione del 30% in caso di possesso della certificazione di qualità conforme alle norme europee della serie UNI CEI ISO 9000.",
-      "confidence": 1
-    },
-    {
       "id": "submission_deadline-2",
       "kind": "submission_deadline",
       "description": "Termine perentorio per la presentazione dell'offerta e della documentazione.",
       "value": "2026-11-09T14:00:00.000Z",
       "page": 23,
       "quote": "L’offerta e la documentazione devono pervenire entro e non oltre il termine perentorio del 09.11.2026 Ore 10:00",
-      "confidence": 1
-    },
-    {
-      "id": "certification-6",
-      "kind": "certification",
-      "description": "Possesso della certificazione di qualità relativa alla parità di genere per l'attribuzione di punteggio.",
-      "value": "certificazione di qualità relativa alla parità di genere",
-      "page": 40,
-      "quote": "Possesso della certificazione di qualità relativa alla parità di genere",
       "confidence": 1
     }
   ]

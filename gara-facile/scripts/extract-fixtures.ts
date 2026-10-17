@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { FIXTURES_DIR, loadFixture } from "../app/services/ai/analyze";
 import { extractRequirements } from "../app/services/ai/extract";
 import { parsePdf } from "../app/services/ai/pdf";
-import { EXTRACT_PROMPT_VERSION } from "../app/services/ai/prompts/extract.v1";
+import { EXTRACT_PROMPT_VERSION } from "../app/services/ai/prompts/extract.v2";
 
 async function main() {
   const ids = process.argv.slice(2).length

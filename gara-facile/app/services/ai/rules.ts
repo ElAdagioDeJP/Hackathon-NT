@@ -26,11 +26,13 @@ const result = (status: ComplianceStatus, reason: string, evidence?: string) => 
   evidence,
 });
 
-// "ISO/IEC 27001:2022" and "iso 27001" compare equal.
+// "ISO/IEC 27001:2022" and "iso 27001" compare equal. "Serie ISO 9000" asks
+// for a quality system of the 9000 family, which ISO 9001 certifies.
 const certKey = (name: string) =>
   canonical(name)
-    .replace(/\b(iso|iec|uni|en)\b/g, " ")
+    .replace(/\b(iso|iec|uni|cei|en)\b/g, " ")
     .replace(/:\d{4}\b/g, "")
+    .replace(/\b9000\b/g, "9001")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 

@@ -62,6 +62,10 @@ test("certification: held, expired, missing, undocumented", () => {
   assert.equal(status(req({ kind: "certification", value: "ISO 9001" })), "FAILS");
   assert.equal(status(req({ kind: "certification", value: "ISO 14001" })), "FAILS");
   assert.equal(status(req({ kind: "certification", value: "qualificazione Cloud AgID" })), "MISSING_DOC");
+  // The ISO 9000 series is satisfied by an ISO 9001 certificate.
+  const iso9001 = { ...company, certifications: [{ name: "ISO 9001:2015", hasDocument: true }] };
+  assert.equal(status(req({ kind: "certification", value: "UNI CEI ISO 9000" }), iso9001), "MEETS");
+  assert.equal(status(req({ kind: "certification", value: "serie UNI EN ISO 9000" }), iso9001), "MEETS");
   // 9001 must not match 19001 by substring.
   assert.equal(status(req({ kind: "certification", value: "ISO 19001" })), "FAILS");
 });

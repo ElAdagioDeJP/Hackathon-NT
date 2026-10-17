@@ -1,29 +1,19 @@
 {
   "tenderId": "629600-2026",
-  "prompt": "extract.v1",
+  "prompt": "extract.v2",
   "stats": {
     "windows": 6,
     "failedWindows": 0,
-    "raw": 10,
+    "raw": 6,
     "droppedNoQuote": 0,
-    "droppedBadValue": 1,
+    "droppedBadValue": 0,
     "duplicates": 0,
-    "ms": 32389,
-    "promptTokens": 31709,
-    "completionTokens": 1046,
+    "ms": 39662,
+    "promptTokens": 32693,
+    "completionTokens": 722,
     "model": "self-dploy/Gemma-4-31B-IT"
   },
   "requirements": [
-    {
-      "id": "execution_deadline-1",
-      "kind": "execution_deadline",
-      "description": "Il contratto avrà una durata di 60 mesi.",
-      "value": 1800,
-      "unit": "days",
-      "page": 2,
-      "quote": "Il relativo contratto avrà una durata di 60 mesi.",
-      "confidence": 0.5
-    },
     {
       "id": "certification-1",
       "kind": "certification",
@@ -45,7 +35,7 @@
     {
       "id": "min_turnover-1",
       "kind": "min_turnover",
-      "description": "Fatturato globale annuo non inferiore nei migliori tre anni degli ultimi cinque anni.",
+      "description": "Fatturato globale annuo non inferiore a 25.200.000,00 Euro nei migliori tre anni degli ultimi cinque.",
       "value": 25200000,
       "unit": "EUR",
       "page": 10,
@@ -55,7 +45,7 @@
     {
       "id": "similar_projects-1",
       "kind": "similar_projects",
-      "description": "Servizi analoghi e di complessità simile ultimati negli ultimi dieci anni, importo complessivo cumulativo.",
+      "description": "Servizi analoghi e di complessità simile conclusi con buon esito negli ultimi dieci anni per un importo complessivo minimo.",
       "value": 21000000,
       "unit": "EUR",
       "page": 10,
@@ -69,34 +59,16 @@
       "value": 0.02,
       "unit": "%",
       "page": 11,
-      "quote": "Le offerte presentate dai concorrenti devono essere corredate da una garanzia provvisoria pari al 2% dell’importo posto a base d’asta",
+      "quote": "Le offerte presentate dai concorrenti devono essere corredate da una garanzia provvisoria pari al 2% dell’importo posto a base d’asta (e quindi pari ad € 420.772,88)",
       "confidence": 1
     },
     {
       "id": "submission_deadline-1",
       "kind": "submission_deadline",
       "description": "Termine ultimo per la presentazione delle offerte.",
-      "value": "2026-11-15T23:59:59.000Z",
+      "value": "2026-11-15T22:59:59.000Z",
       "page": 16,
       "quote": "Le offerte, redatte in lingua italiana e complete della relativa documentazione devono essere presentate, a pena di esclusione dalla gara, entro e non oltre il giorno 15 novembre 2026",
-      "confidence": 0.95
-    },
-    {
-      "id": "certification-3",
-      "kind": "certification",
-      "description": "Certificazione ISO 9001:2015",
-      "value": "ISO 9001:2015",
-      "page": 27,
-      "quote": "I.1 Certificazione ISO 9001 :2015",
-      "confidence": 1
-    },
-    {
-      "id": "certification-4",
-      "kind": "certification",
-      "description": "Certificazione ISO/IEC 27001:2022",
-      "value": "ISO/IEC 27001:2022",
-      "page": 27,
-      "quote": "I.2 Certificazione ISO/IEC 27001:2022",
       "confidence": 1
     }
   ]

@@ -197,7 +197,7 @@ export function createLlmClient(deps: {
         if (!res.ok) return { model: target.model, ok: false, ms, error: `HTTP ${res.status}` };
         const json = (await res.json()) as { data?: { id: string }[] };
         const served = json.data?.map((m) => m.id) ?? [];
-        return { model: target.model, ok: served.includes(target.model), ms, served };
+        return { model: target.model, ok: served.includes(target.model), ms };
       } catch (error) {
         return {
           model: null,

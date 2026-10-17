@@ -2,7 +2,6 @@ import { AnalyzeError, analyzeTender, saveAnalysis } from "@/app/services/ai/ana
 import { LlmError } from "@/app/services/ai/llm";
 import { getCompanyFacts } from "@/app/services/ai/profileFacts";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function POST(request: Request) {

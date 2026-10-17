@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { chat as defaultChat } from "./llm";
 import { canonical, parseAmount, parseDays, parsePercent } from "./normalize";
-import { EXTRACT_SYSTEM, extractUserPrompt } from "./prompts/extract.v1";
+import { EXTRACT_SYSTEM, extractUserPrompt } from "./prompts/extract.v2";
 import { REQUIREMENT_KINDS, type Requirement, type RequirementKind, type TenderPage } from "./types";
 
 export const WINDOW_PAGES = 7;
