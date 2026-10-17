@@ -26,7 +26,7 @@ async function main() {
       JSON.stringify({ tenderId: fixture.tenderId, prompt: EXTRACT_PROMPT_VERSION, stats, requirements }, null, 2) + "\n",
     );
     console.log(`  ${requirements.length} requirements`, stats);
-}
+  }
 }
 
 main().catch((error) => {

@@ -22,7 +22,7 @@ export const DEMO_COMPANY: CompanyFacts = {
   employees: 18,
   isSme: true,
   bidGuaranteeCapacityEur: 40_000,
-  maxExecutionDays: 180,
+  maxExecutionDays: 45,
   referenceProjects: [
     { name: "Portale servizi online", client: "Comune di Bergamo", year: 2024, valueEur: 310_000, isPublic: true },
     { name: "Migrazione cloud gestionale", client: "ASST Lodi", year: 2025, valueEur: 420_000, isPublic: true },
