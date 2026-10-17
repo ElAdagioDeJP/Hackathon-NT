@@ -115,7 +115,7 @@ test("find matches upserts contracts, replaces the ledger, and keeps contracts w
     assert.equal(afterFailure.length, 1);
     assert.equal(afterFailure[0].type, "partial");
     assert.equal(
-      f.sqlite.prepare("SELECT count(*) AS c FROM contracts").get().c,
+      (f.sqlite.prepare("SELECT count(*) AS c FROM contracts").get() as { c: number }).c,
       2,
     );
   } finally {
