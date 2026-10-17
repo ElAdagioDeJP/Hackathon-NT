@@ -1,0 +1,8 @@
+# Local databases and SQLite sidecars, including runs from the repository root.
+*.db
+*.db-shm
+*.db-wal
+
+# Private environment files; only templates belong in version control.
+.env*
+!.env.example
