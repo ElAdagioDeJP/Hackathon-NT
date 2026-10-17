@@ -43,7 +43,7 @@ export async function evolusRequest(
   const headers = new Headers(init.headers);
   headers.set("X-ApiKey", apiKey);
   headers.set("X-Application-Id", appId);
-  if (init.body && !headers.has("Content-Type")) {
+  if (typeof init.body === "string" && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
