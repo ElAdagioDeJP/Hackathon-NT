@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { PROFILE_COOKIE } from "../services/business/profiles";
+import { matchLimiter, RateLimitError } from "../services/limits/rate-limit";
 import { MatchError } from "../services/match/find-matches";
 import { getMatchService } from "../services/match/runtime";
 import type { StoredMatch } from "../services/match/types";
@@ -27,10 +28,18 @@ export async function findMatchesAction(): Promise<
   try {
     const jar = await cookies();
     const service = await getMatchService();
-    const matches = await service.findMatches(jar.get(PROFILE_COOKIE)?.value);
+    const token = jar.get(PROFILE_COOKIE)?.value;
+    const saved = service.profile(token);
+    // Unknown sessions fail inside findMatches without reaching TED or Evolus.
+    const matches = saved
+      ? await matchLimiter.run(`record:${saved.recordId}`, () =>
+          service.findMatches(token),
+        )
+      : await service.findMatches(token);
     return { matches };
   } catch (error) {
-    if (error instanceof MatchError) return { error: error.message };
+    if (error instanceof MatchError || error instanceof RateLimitError)
+      return { error: error.message };
     console.error("Could not find matches", {
       errorType: error instanceof Error ? error.name : "UnknownError",
     });

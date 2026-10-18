@@ -18,6 +18,7 @@
     "test:files:http": "node scripts/check-files-http.mjs",
     "test:profiles": "tsx --test app/services/business/*.test.ts",
     "test:match": "tsx --test app/services/match/*.test.ts",
+    "test:limits": "tsx --test app/services/limits/*.test.ts",
     "ai:extract-fixtures": "tsx --env-file=.env scripts/extract-fixtures.ts"
   },
   "dependencies": {

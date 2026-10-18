@@ -29,6 +29,10 @@ export function createMatchService(
   const askEvolus = deps.requestMatches ?? requestEvolusMatches;
 
   return {
+    profile(token: string | undefined) {
+      return profiles.get(token);
+    },
+
     list(token: string | undefined): StoredMatch[] {
       const saved = profiles.get(token);
       if (!saved) return [];
