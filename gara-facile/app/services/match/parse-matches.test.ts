@@ -86,3 +86,25 @@ test("rejects missing contracts, bad scores and unknown ids", () => {
     /0 to 100/,
   );
 });
+
+test("ignores prose around the JSON payload, even with brackets inside strings", () => {
+  const json = JSON.stringify({
+    matches: [
+      { contractId: "TED-1", type: "exact", score: 90, rationale: "Fits {all} [criteria]" },
+      { contractId: "TED-2", type: "none", score: 0, rationale: "Unrelated \"catering\"" },
+    ],
+  });
+  for (const content of [
+    `${json}\nLet me know if you need more detail.`,
+    `Here are the results: ${json} Hope this helps [1].`,
+    `Results:\n${json}\n\nNote: scores are 0-100 {approx}.`,
+  ]) {
+    const matches = parseEvolusMatchResponse(content, contracts, 1);
+    assert.equal(matches.length, 2);
+    assert.equal(matches[0].rationale, "Fits {all} [criteria]");
+  }
+  assert.throws(
+    () => parseEvolusMatchResponse('{"matches": [', contracts, 1),
+    /valid JSON/,
+  );
+});

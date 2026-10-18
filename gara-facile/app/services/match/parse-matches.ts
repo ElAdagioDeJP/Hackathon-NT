@@ -110,7 +110,9 @@ function extractJson(content: string): string {
   if (!trimmed) {
     throw new MatchParseError("The Matching agent returned an empty reply.");
   }
-  if (trimmed.startsWith("{") || trimmed.startsWith("[")) return trimmed;
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    return balancedJson(trimmed, 0);
+  }
 
   const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fenced?.[1]) return fenced[1].trim();
@@ -128,7 +130,29 @@ function extractJson(content: string): string {
       "The Matching agent reply did not contain a JSON payload.",
     );
   }
-  return trimmed.slice(start);
+  return balancedJson(trimmed, start);
+}
+
+// Cut at the bracket that closes the payload so trailing prose is ignored.
+// An unbalanced payload is returned whole and fails in JSON.parse.
+function balancedJson(text: string, start: number): string {
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+    if (inString) {
+      if (char === "\\") i++;
+      else if (char === '"') inString = false;
+    } else if (char === '"') {
+      inString = true;
+    } else if (char === "{" || char === "[") {
+      depth++;
+    } else if (char === "}" || char === "]") {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return text.slice(start);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
