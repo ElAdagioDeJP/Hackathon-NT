@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { findMatchesAction, listStoredMatches } from "./match-actions";
+import { decodeHtmlEntities } from "../services/match/html-entities";
 import type { StoredMatch } from "../services/match/types";
 
 export function MatchPanel({ enabled }: { enabled: boolean }) {
@@ -107,10 +108,12 @@ export function MatchPanel({ enabled }: { enabled: boolean }) {
                 rel="noreferrer"
                 className="match-title"
               >
-                {match.title}
+                {decodeHtmlEntities(match.title)}
               </a>
               {match.buyerName ? (
-                <p className="field-hint">Buyer: {match.buyerName}</p>
+                <p className="field-hint">
+                  Buyer: {decodeHtmlEntities(match.buyerName)}
+                </p>
               ) : null}
               {match.deadline ? (
                 <p className="field-hint">Deadline: {match.deadline}</p>
