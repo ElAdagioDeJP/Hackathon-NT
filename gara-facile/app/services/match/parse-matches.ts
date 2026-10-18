@@ -41,23 +41,37 @@ export function parseEvolusMatchResponse(
     if (!isRecord(row)) {
       throw new MatchParseError("Each match must be a JSON object.");
     }
-    const contractId = String(row.contractId ?? "").trim();
+    // Check types before trimming: String() would turn objects, arrays and
+    // null into plausible-looking values.
+    const contractId =
+      typeof row.contractId === "string" ? row.contractId.trim() : "";
     if (!contractId) {
       throw new MatchParseError("Each match needs a contractId.");
     }
-    const type = String(row.type ?? "").trim() as MatchType;
+    if (byId.has(contractId)) {
+      throw new MatchParseError(
+        `The Matching agent returned contract ${contractId} more than once.`,
+      );
+    }
+    const type = (typeof row.type === "string" ? row.type.trim() : "") as MatchType;
     if (!MATCH_TYPES.has(type)) {
       throw new MatchParseError(
         `Invalid match type "${type}" for contract ${contractId}.`,
       );
     }
-    const score = Number(row.score);
-    if (!Number.isInteger(score) || score < 0 || score > 100) {
+    const score = row.score;
+    if (
+      typeof score !== "number" ||
+      !Number.isInteger(score) ||
+      score < 0 ||
+      score > 100
+    ) {
       throw new MatchParseError(
         `Score for contract ${contractId} must be an integer from 0 to 100.`,
       );
     }
-    const rationale = String(row.rationale ?? "").trim();
+    const rationale =
+      typeof row.rationale === "string" ? row.rationale.trim() : "";
     if (!rationale) {
       throw new MatchParseError(
         `Rationale is required for contract ${contractId}.`,
