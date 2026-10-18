@@ -1,6 +1,7 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import {
+  businessRecords,
   contractMatches,
   contracts,
   submissions,
@@ -38,8 +39,27 @@ export function createMatchStore(db: BetterSQLite3Database) {
       }
     },
 
-    replaceLedger(businessRecordId: number, matches: MatchModel[]) {
-      db.transaction((tx) => {
+    // Returns false, writing nothing, when the profile is no longer the
+    // approved version the run started from (approvedAt as an ISO string).
+    replaceLedger(
+      businessRecordId: number,
+      matches: MatchModel[],
+      approvedAt: string | null,
+    ): boolean {
+      return db.transaction((tx) => {
+        const record = tx
+          .select({
+            status: businessRecords.status,
+            approvedAt: businessRecords.approvedAt,
+          })
+          .from(businessRecords)
+          .where(eq(businessRecords.id, businessRecordId))
+          .get();
+        if (
+          record?.status !== "approved" ||
+          (record.approvedAt?.toISOString() ?? null) !== approvedAt
+        )
+          return false;
         const existing = tx
           .select({ id: contractMatches.id })
           .from(contractMatches)
@@ -67,6 +87,7 @@ export function createMatchStore(db: BetterSQLite3Database) {
             })
             .run();
         }
+        return true;
       });
     },
 

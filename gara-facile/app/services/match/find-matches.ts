@@ -102,7 +102,11 @@ export function createMatchService(
         );
       }
 
-      store.replaceLedger(saved.recordId, matches);
+      if (!store.replaceLedger(saved.recordId, matches, saved.approvedAt)) {
+        throw new MatchError(
+          "Your profile changed while Matching was running. Approve it and Find matches again.",
+        );
+      }
       return store.list(saved.recordId);
     },
   };
