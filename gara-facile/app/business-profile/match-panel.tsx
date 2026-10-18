@@ -79,7 +79,7 @@ export function MatchPanel({ enabled }: { enabled: boolean }) {
         <p className="match-error" role="alert">
           {error}
           {matches.length
-            ? " The matches below are from your last successful run."
+            ? `${/[.!?]$/.test(error) ? "" : "."} The matches below are from your last successful run.`
             : ""}
         </p>
       ) : null}
