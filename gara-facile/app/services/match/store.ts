@@ -11,21 +11,12 @@ import type { ContractModel, MatchModel, StoredMatch } from "./types";
 export function createMatchStore(db: BetterSQLite3Database) {
   return {
     upsertContracts(models: ContractModel[]) {
-      for (const model of models) {
-        db.insert(contracts)
-          .values({
-            id: model.id,
-            title: model.title,
-            url: model.url,
-            description: model.description || null,
-            placeCountries: model.placeCountries,
-            cpvCodes: model.cpvCodes,
-            deadline: model.deadline,
-            buyerName: model.buyerName,
-          })
-          .onConflictDoUpdate({
-            target: contracts.id,
-            set: {
+      // All or nothing: a failed row must not leave a half-updated batch.
+      db.transaction((tx) => {
+        for (const model of models) {
+          tx.insert(contracts)
+            .values({
+              id: model.id,
               title: model.title,
               url: model.url,
               description: model.description || null,
@@ -33,10 +24,22 @@ export function createMatchStore(db: BetterSQLite3Database) {
               cpvCodes: model.cpvCodes,
               deadline: model.deadline,
               buyerName: model.buyerName,
-            },
-          })
-          .run();
-      }
+            })
+            .onConflictDoUpdate({
+              target: contracts.id,
+              set: {
+                title: model.title,
+                url: model.url,
+                description: model.description || null,
+                placeCountries: model.placeCountries,
+                cpvCodes: model.cpvCodes,
+                deadline: model.deadline,
+                buyerName: model.buyerName,
+              },
+            })
+            .run();
+        }
+      });
     },
 
     // Returns false, writing nothing, when the profile is no longer the
@@ -125,13 +128,6 @@ export function createMatchStore(db: BetterSQLite3Database) {
           buyerName: row.buyerName,
         }));
     },
-
-    listVisible(businessRecordId: number): StoredMatch[] {
-      return this.list(businessRecordId).filter(
-        (match) => match.type !== "none",
-      );
-    },
-
   };
 }
 
