@@ -421,7 +421,12 @@ export default function BusinessForm({
     setSaving(true);
     setFormError("");
     try {
-      const result = await saveBusinessProfile(profile, complete, approve);
+      const result = await saveBusinessProfile(
+        profile,
+        complete,
+        approve,
+        saved?.recordId,
+      );
       if ("error" in result) {
         setFormError(result.error);
         if (result.fields) {

@@ -83,13 +83,19 @@ export function createProfileService(db: BetterSQLite3Database) {
       input: unknown,
       complete: boolean,
       approve = false,
+      // The saved profile the browser is editing; undefined starts a new one.
+      editingRecordId?: number,
     ) {
       const { profile, errors } = parseProfile(input, complete || approve);
       if (Object.keys(errors).length)
         throw new ProfileError("Please check the highlighted fields.", errors);
       const current = session(token);
       // An expired/stale cookie must not silently turn an edit into a new company.
-      if (token && !current)
+      if (
+        (token && !current) ||
+        (editingRecordId !== undefined &&
+          current?.businessRecordId !== editingRecordId)
+      )
         throw new ProfileError(
           "Your session has expired. Reload the page to start a new profile.",
         );

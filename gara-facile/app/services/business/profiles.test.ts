@@ -220,3 +220,29 @@ test("profiles already referenced by matching cannot be silently overwritten", (
     f.sqlite.close();
   }
 });
+
+test("saving an open profile after its session expired never creates another company", () => {
+  const f = fixture();
+  try {
+    const owner = f.service.save(undefined, complete, true);
+    const other = f.service.save(undefined, complete, true);
+    const recordId = owner.saved.recordId;
+    const companies = () =>
+      f.sqlite.prepare("SELECT count(*) AS c FROM businesses").get() as { c: number };
+    assert.throws(
+      () => f.service.save(other.newToken, complete, true, false, recordId),
+      /expired/,
+    );
+    f.sqlite.exec("UPDATE business_profile_sessions SET expires_at = 1");
+    for (const token of [owner.newToken, undefined])
+      assert.throws(
+        () => f.service.save(token, { ...complete, city: "Valencia" }, true, false, recordId),
+        /expired/,
+      );
+    assert.equal(companies().c, 2);
+    // A browser that opened a fresh form may still start a new profile.
+    assert.ok(f.service.save(undefined, complete, true).newToken);
+  } finally {
+    f.sqlite.close();
+  }
+});
