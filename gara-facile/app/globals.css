@@ -163,6 +163,25 @@ a {
   color: #fdbd6d;
   font-size: 14px;
 }
+.workspace-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.workspace-nav a {
+  padding: 13px 12px;
+  font-size: 16px;
+  text-decoration: none;
+  color: #c2cade;
+}
+.workspace-nav a:hover {
+  color: white;
+  background: #2a385c;
+}
+.workspace-nav a[aria-current="page"] {
+  color: white;
+  background: #344264;
+}
 .sidebar-note {
   margin-top: auto;
   padding-top: 40px;
@@ -885,6 +904,16 @@ fieldset.field legend {
   .step-nav {
     flex-direction: row;
     gap: 4px;
+  }
+  .workspace-nav {
+    flex-direction: row;
+    gap: 4px;
+  }
+  .workspace-nav a {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 4px;
   }
   .step-nav button {
     flex: 1;

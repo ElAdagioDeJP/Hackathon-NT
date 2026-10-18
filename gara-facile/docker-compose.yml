@@ -18,6 +18,7 @@ services:
     volumes:
       - gara-data:/app/data
       - gara-uploads:/app/var/uploads
+      - gara-evolus:/app/var/evolus
     healthcheck:
       # Home page only: /api/ai/health calls the model provider and spends rate limit.
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -29,3 +30,4 @@ services:
 volumes:
   gara-data:
   gara-uploads:
+  gara-evolus:

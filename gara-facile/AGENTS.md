@@ -1,6 +1,6 @@
 ## Product language
 
-Write all application UI in English, including navigation, form labels, placeholders, validation and status messages, sample content, country names, accessibility labels, and page metadata. Set the document language to `en`. Preserve user-entered content and the Gara Facile brand name.
+Write all application UI in English, including navigation, form labels, placeholders, validation and status messages, sample content, country names, accessibility labels, and page metadata. Set the document language to `en`. Preserve user-entered content and the Gara Facile brand name. The bid draft content itself is Italian by design (the tender language); UI chrome around it stays English.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -23,9 +23,9 @@ El formulario tiene secciones de empresa, capacidades, documentos opcionales y r
 
 La interfaz está en inglés, incluidos los errores, ejemplos, países, textos de accesibilidad y metadatos. Esta convención está definida en `AGENTS.md`.
 
-El resumen lateral refleja lo escrito. El indicador cuenta seis grupos de información completos y no estima la elegibilidad de la empresa. “Load example” introduce datos ficticios de Voltio Electrical para recorrer la interfaz.
+El resumen lateral refleja lo escrito. El indicador cuenta seis grupos de información completos y no estima la elegibilidad de la empresa. “Load example” introduce datos ficticios de Voltio Electrical para recorrer el formulario (la empresa demo del análisis en `/tenders` es en cambio Nordest Software S.r.l., calibrada para dar 2 rojos y 1 verde).
 
-El formulario guarda el perfil mediante Server Actions al avanzar o pulsar “Save draft”. Al volver desde el mismo navegador, recupera los datos y documentos guardados. “Confirm profile” valida los datos completos y registra la aprobación. Tras aprobar, “Find matches” consulta TED, llama al agente de Matching en Evolus y guarda el ledger de matches. Configura `EU_API_KEY` y las variables `EVOLUS_*` (ver [docs/matching-agent.md](docs/matching-agent.md)).
+El formulario guarda el perfil mediante Server Actions al avanzar o pulsar “Save draft”. Al volver desde el mismo navegador, recupera los datos y documentos guardados. “Confirm profile” valida los datos completos y registra la aprobación. Tras aprobar, “Find matches” consulta TED, llama al agente de Matching en Evolus y guarda el ledger de matches. En la pestaña Review, “Analyze tenders” lleva a `/tenders`: tarjetas de 3 licitaciones → Analyze → matriz de cumplimiento (Meets / Fails / Missing document) con veredicto GO/NO_GO por reglas fijas, caja *Evolus vs our extractor*, borrador de oferta editable con Approve / Edit again / Download .txt, y caja *Running on AMD*. Configura `EU_API_KEY` y las variables `EVOLUS_*` (ver [docs/matching-agent.md](docs/matching-agent.md) y [docs/evolus.md](docs/evolus.md)).
 
 Una cookie HttpOnly vincula el navegador con su perfil durante 30 días. La base solo guarda el hash de ese identificador. Es acceso anónimo por navegador, no una cuenta de usuario: no hay login ni recuperación desde otro dispositivo. El token de operador de archivos nunca llega al navegador.
 
@@ -70,7 +70,7 @@ bun run test:files
 
 ## Servicio TED existente
 
-`app/services/TED/fetch.ts` expone `searchNotices`. Necesita `EU_API_KEY` en el entorno del servidor. `app/services/TED/test.zsh` permite probar la consulta por separado. Este servicio todavía no está conectado al formulario.
+`app/services/TED/fetch.ts` expone `searchNotices`. Necesita `EU_API_KEY` en el entorno del servidor. `app/services/TED/test.zsh` permite probar la consulta por separado. El formulario lo usa en *Find matches* junto al agente de Matching de Evolus.
 
 ## Verificación
 
@@ -80,6 +80,14 @@ bun run build
 bun run db:check
 bun run test:profiles
 bun run test:match
+bun run test:ai
+bun run test:tenders
+bun run test:limits
 bun run test:files
 bun run test:files:http
+bun run bench
 ```
+
+## Assistant
+
+The assistant is the Evolus chat widget bubble (`app/components/evolus-widget.tsx`, mounted in `app/layout.tsx`). It only loads on the deployed domain; on localhost it returns 403 ORIGIN_NOT_ALLOWED, which is expected. `POST /api/ai/chat` exists but no UI uses it (API-only).

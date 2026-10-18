@@ -161,9 +161,15 @@ export async function getTenderWorkflowExecution(
 export function evolusErrorResponse(error: unknown): Response {
   if (!(error instanceof EvolusApiError)) throw error;
   const status = error.status;
-  if (status === undefined && error.message.includes("not configured"))
-    return Response.json({ error: error.message }, { status: 503 });
-  if (status === 402 || status === 409 || status === 429)
-    return Response.json({ error: error.message }, { status });
-  return Response.json({ error: error.message }, { status: 502 });
+  const message = error.message;
+  console.error({ status: status ?? null, message });
+  if (status === undefined && message.includes("not configured"))
+    return Response.json({ error: "Evolus is not configured." }, { status: 503 });
+  if (status === 402)
+    return Response.json({ error: "Evolus credits are exhausted." }, { status });
+  if (status === 409)
+    return Response.json({ error: "The Evolus agent is paused or busy." }, { status });
+  if (status === 429)
+    return Response.json({ error: "Evolus is rate limiting requests. Try again later." }, { status });
+  return Response.json({ error: "Evolus is temporarily unavailable. Try again later." }, { status: 502 });
 }

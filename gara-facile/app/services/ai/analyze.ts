@@ -48,6 +48,26 @@ export interface AnalyzeOutput {
   stats: ExtractionStats;
 }
 
+// Saved, reviewed requirements win over live extraction: the LLM extraction is
+// nondeterministic, so re-running it can silently change the verdict.
+export async function loadSavedRequirements(
+  tenderId: string,
+  dir = FIXTURES_DIR,
+): Promise<{ requirements: Requirement[]; stats: ExtractionStats } | null> {
+  const raw = await readFile(join(dir, `${tenderId}.requirements.json`), "utf8").catch(() => null);
+  if (raw === null) return null;
+  try {
+    const parsed = JSON.parse(raw) as { requirements?: unknown; stats?: unknown };
+    if (!parsed || !Array.isArray(parsed.requirements)) return null;
+    return {
+      requirements: parsed.requirements as Requirement[],
+      stats: parsed.stats as ExtractionStats,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function analyzeTender(input: {
   tenderId: string;
   company: CompanyFacts;
@@ -57,10 +77,24 @@ export async function analyzeTender(input: {
 }): Promise<AnalyzeOutput> {
   const started = performance.now();
   const { fixture, bytes } = await loadFixture(input.tenderId);
-  const { pages } = await loadTenderPages(bytes, { tenderId: fixture.tenderId, source: fixture.pdf });
-  const { requirements, stats } = await (input.extract ?? extractRequirements)(pages, {
-    signal: input.signal,
-  });
+  let requirements: Requirement[];
+  let stats: ExtractionStats;
+  if (input.extract) {
+    const { pages } = await loadTenderPages(bytes, { tenderId: fixture.tenderId, source: fixture.pdf });
+    ({ requirements, stats } = await input.extract(pages, {
+      signal: input.signal,
+    }));
+  } else {
+    const saved = await loadSavedRequirements(fixture.tenderId);
+    if (saved) {
+      ({ requirements, stats } = saved);
+    } else {
+      const { pages } = await loadTenderPages(bytes, { tenderId: fixture.tenderId, source: fixture.pdf });
+      ({ requirements, stats } = await extractRequirements(pages, {
+        signal: input.signal,
+      }));
+    }
+  }
   const results = evaluateAll(requirements, input.company, {
     tenderId: fixture.tenderId,
     lotId: fixture.lotId,

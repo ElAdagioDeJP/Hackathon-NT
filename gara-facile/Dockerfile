@@ -26,7 +26,7 @@ ENV NODE_ENV=production \
     FILES_STORAGE_PROVIDER=local \
     FILES_LOCAL_DIR=/app/var/uploads
 COPY --from=build --chown=node:node /app ./
-RUN mkdir -p /app/data /app/var/uploads && chown -R node:node /app/data /app/var
+RUN mkdir -p /app/data /app/var/uploads /app/var/evolus && chown -R node:node /app/data /app/var
 USER node
 EXPOSE 3000
 CMD ["sh", "scripts/docker-start.sh"]

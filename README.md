@@ -66,13 +66,15 @@ The six requirement kinds the engine understands: `certification`, `min_turnover
 
 All numbers below were measured on 17-18 Oct 2026 against three real TED tenders and one fictional company (*Nordest Software S.r.l.*, calibrated to give 2 red and 1 green).
 
-| Tender | Verdict | Score | Rules (meets / fails) | Analysis time | Tokens |
+| Tender | Verdict | Score | Rules (meets / fails) | Extraction time (saved stats) | Prompt tokens |
 |---|---|---|---|---|---|
-| 629600-2026 · custom software services | `NO_GO` | 13 | 1 / 5 | 31.1 s | 33,393 |
-| 687674-2026 · servers, installation, configuration | `GO` | 100 | 3 / 0 | 23.9 s | 45,910 |
-| 691579-2026 · municipal fines management, Alatri | `NO_GO` | 53 | 6 / 4 | 57.1 s | 61,414 |
+| 629600-2026 · custom software services | `NO_GO` | 13 | 1 / 5 | 39662 ms | 32693 |
+| 687674-2026 · servers, installation, configuration | `GO` | 100 | 3 / 0 | 53837 ms | 45333 |
+| 691579-2026 · municipal fines management, Alatri | `NO_GO` | 53 | 6 / 4 | 81574 ms | 60388 |
 
-Model reported by the endpoint: `self-dploy/Gemma-4-31B-IT`.
+Same figures as [`gara-facile/docs/benchmark.md`](gara-facile/docs/benchmark.md). Analysis itself reuses the saved reviewed requirements (`fixtures/tenders/<id>.requirements.json`, live LLM extraction only as fallback), so `/tenders` answers in about 0.3 s; the ms/tokens columns above are the saved extraction stats, not a new run.
+
+Model: `Gemma-4-31B-IT` via AMD Token Factory (the endpoint reports it as `self-dploy/Gemma-4-31B-IT`).
 
 **Evolus blocks** (workspace on the Developer Event trial, 50,000 credits):
 
@@ -87,9 +89,9 @@ Model reported by the endpoint: `self-dploy/Gemma-4-31B-IT`.
 
 ## AMD and Evolus
 
-- **Model.** Every chat and extraction call, in our own code and in Evolus, goes to **Gemma-4-31B-IT** served on AMD infrastructure through an OpenAI-compatible endpoint (AMD Token Factory on AMD Radeon Cloud). Evolus connects it as a *bring your own model* server, so agents, the extractor and the workflow run only on that model. The only other model in play is the embedding model Evolus uses to index the knowledge library (`text-embedding-3-small`).
+- **Model.** Every chat and extraction call, in our own code and in Evolus, goes to **Gemma-4-31B-IT** (Gemma only; the earlier Qwen second-model plan was dropped) served on AMD infrastructure through an OpenAI-compatible endpoint (AMD Token Factory on AMD Radeon Cloud, 20 RPM shared team cap). Evolus connects it as a *bring your own model* server, so agents, the extractor and the workflow run only on that model. The only other model in play is the embedding model Evolus uses to index the knowledge library (`text-embedding-3-small`).
 - **Evolus building blocks used:** agent with RAG knowledge library, a second agent for matching, a data extractor, an API-triggered workflow, and the chat widget. The app calls all of them over REST.
-- **Honest note on the track rule.** The track asks for an open model on *your own* vLLM endpoint in AMD Developer Cloud. We reach AMD-served Gemma through Token Factory; our account had no droplet credits for a dedicated MI300X. The vLLM launch scripts for that setup are in [`infra/amd`](infra/amd).
+- **Honest note on the track rule.** The track asks for an open model on *your own* vLLM endpoint in AMD Developer Cloud. We reach AMD-served Gemma through Token Factory; our account had no droplet credits for a dedicated MI300X, so the own-droplet plan was dropped. The launch scripts kept for reference are in [`infra/amd`](infra/amd).
 
 Details, IDs and a reproduction recipe: [`gara-facile/docs/evolus.md`](gara-facile/docs/evolus.md).
 
@@ -135,12 +137,15 @@ Secrets live only in `gara-facile/.env`, which is git-ignored. See [`.env.exampl
 | Method and path | What it does |
 |---|---|
 | `POST /api/ai/analyze` | Requirements → rules → score and verdict for a tender and a company |
-| `GET /api/ai/health` | Checks the model endpoint |
-| `POST /api/ai/chat` | Chat with the Evolus Assistant (keeps `conversationId`) |
+| `GET /api/ai/tenders` | Lists the 3 fixture tenders with the latest saved analysis |
+| `POST /api/ai/draft` | Editable bid draft in Italian (Gemma on AMD), with Approve / Edit again / Download .txt |
+| `GET /api/ai/amd-stats` · `GET /api/ai/health` | What already ran on AMD · whether the model endpoint answers |
+| `POST /api/ai/chat` | Chat with the Evolus Assistant (API-only, no UI client uses it) |
 | `POST` · `GET /api/ai/evolus/extract` | Evolus extractor as a second opinion; runs in the background, cached, compares with our extraction |
 | `POST /api/ai/evolus/workflow` · `GET …/{executionId}` | Starts and reads the *Tender intake* workflow |
 | `POST /api/ai/evolus/library/sync` | Uploads the company sheet to the knowledge library |
 | `GET` · `POST` · `DELETE /api/business-records/{id}/documents` | Profile documents on local disk or Cloudflare R2 |
+| `GET /api/business-records/{id}/documents/{documentId}` | Streams one document download |
 
 Server Actions behind the profile form handle saving, approval and *Find matches*.
 
@@ -150,17 +155,18 @@ Server Actions behind the profile form handle saving, approval and *Find matches
 gara-facile/
   app/
     business-profile/        profile form and matches panel
-    api/ai/                  analyze · chat · evolus/* · health
+    tenders/                 tender cards, compliance matrix, draft, AMD panel
+    api/ai/                  analyze · chat · draft · tenders · amd-stats · health · evolus/*
     api/business-records/    documents API
     services/
-      ai/                    pdf · extract · normalize · rules · scoring · Evolus client
+      ai/                    pdf · extract · normalize · rules · scoring · analyze · draft · tenders · amdStats · benchmark · Evolus client
       match/                 TED search + Evolus Matching agent
       files/                 local and Cloudflare R2 storage
       business/              profiles and approvals
     db/schema.ts             Drizzle + SQLite
-  fixtures/                  3 real tenders, fictional company, labelled requirements
-  docs/                      evolus.md · matching-agent.md · files-api.md · ADRs
-infra/amd/                   vLLM launch scripts for a dedicated AMD GPU
+  fixtures/                  3 real tenders (+ saved requirements), fictional company, labelled requirements
+  docs/                      evolus.md · matching-agent.md · files-api.md · benchmark.md · ADRs
+infra/amd/                   vLLM launch scripts, kept for reference (own-droplet plan dropped)
 docker-compose.yml           Dokploy entry point
 ```
 
@@ -168,10 +174,14 @@ docker-compose.yml           Dokploy entry point
 
 ```bash
 cd gara-facile
-bun run test:ai          # 45 tests: extraction, rules, Evolus blocks, library
-bun run test:match       # TED + Matching agent
-bun run test:profiles
-bun run test:files
+bun run test:ai          # 89 tests: extraction, rules, Evolus blocks, library
+bun run test:match       # 16 tests: TED + Matching agent
+bun run test:profiles    # 5 tests
+bun run test:tenders      # 11 tests: /tenders helpers and errors
+bun run test:limits       # 4 tests: rate limits
+bun run test:files        # 10 tests (known Windows symlink failure, expect 9/10 there)
+bun run bench             # regenerates docs/benchmark.md
+bun run ai:extract-fixtures  # re-extracts fixture requirements (live LLM, slow)
 bun run db:check         # migrations on a new and on a populated database
 bun run lint
 ```
@@ -186,7 +196,9 @@ bun run lint
 
 ## Status
 
-Working today: profile and document upload, TED matching with the Evolus agent, requirement extraction, the rule engine and scoring, and all Evolus blocks over API. In progress: the compliance-matrix screens, the AI-generated offer draft with an *Approve* step, and an AMD stats panel.
+Working today: company profile and document upload, TED matching with the Evolus agent, `/tenders` (tender cards → Analyze → compliance matrix with MEETS / FAILS / MISSING_DOC and a fixed-rules GO / NO_GO verdict), the editable AI offer draft with Approve / Edit again / Download .txt, the *Running on AMD* panel, and all Evolus blocks over API. Out of scope: CPV filter, in-app assistant screen (the assistant is the Evolus widget bubble only).
+
+Live at `https://garefacile.empovaro.com` via Dokploy (compose file at the repo root). The home page holds the business-profile form (Company, Capabilities, Documents, Review) with the Matches panel on Review; *Analyze tenders* links to `/tenders`, which uses the profile cookie or the demo company with a notice. Errors are friendly (429 with retry-after, 401/403 session, 502 model unavailable). A shared sidebar (`app/components/app-sidebar.tsx`) links Business profile · Matches · Tenders; *Matches* opens the Review step when the profile is approved. The assistant widget only loads on the deployed domain; on localhost it returns 403 ORIGIN_NOT_ALLOWED, which is expected.
 
 ## License
 

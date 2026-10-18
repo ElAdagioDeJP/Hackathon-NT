@@ -1,0 +1,58 @@
+[
+  {
+    "kind": "submission_deadline",
+    "description": "Termine perentorio per la presentazione delle offerte",
+    "value": "09.11.2026 Ore 10:00",
+    "page": 23,
+    "quote": "L’offerta e la documentazione devono pervenire entro e non oltre il termine perentorio del 09.11.2026 Ore 10:00 a pena di irricevibilità."
+  },
+  {
+    "kind": "min_turnover",
+    "description": "Fatturato globale maturato nel triennio precedente",
+    "value": "€ 1.000.000,00",
+    "page": 16,
+    "quote": "Fatturato globale maturato nel triennio precedente almeno pari € 1.000.000,00 IVA esclusa, di cui almeno € 300.000,00 relativo ai servizi analoghi a quelli oggetto di appalto"
+  },
+  {
+    "kind": "similar_projects",
+    "description": "Esecuzione di servizi analoghi a favore di amministrazioni territoriali nel triennio 2022-2023-2024",
+    "value": "n. 5 servizi",
+    "page": 17,
+    "quote": "Esecuzione nel triennio 2022-2023-2024 di almeno n. 5 servizi analoghi a favore di amministrazioni territoriali, di durata non inferiore a tre anni e di cui, almeno uno, destinato ad un Ente che abbia un numero minimo di provvedimenti sanzionatori gestiti nel suddetto triennio pari a 150.000,00"
+  },
+  {
+    "kind": "certification",
+    "description": "Certificazione di qualità 9001:2015",
+    "value": "ISO 9001:2015",
+    "page": 17,
+    "quote": "Certificazione di qualità 9001:2015"
+  },
+  {
+    "kind": "certification",
+    "description": "Certificazione di qualità ISO 27001:2022",
+    "value": "ISO 27001:2022",
+    "page": 17,
+    "quote": "Certificazione di qualità ISO 27001:2022"
+  },
+  {
+    "kind": "certification",
+    "description": "Certificazione di qualità ISO 14001:2015",
+    "value": "ISO 14001:2015",
+    "page": 17,
+    "quote": "Certificazione di qualità ISO 14001:2015"
+  },
+  {
+    "kind": "certification",
+    "description": "Certificazione etica SA8000",
+    "value": "SA8000",
+    "page": 17,
+    "quote": "Certificazione etica SA8000"
+  },
+  {
+    "kind": "bid_guarantee",
+    "description": "Garanzia provvisoria pari al 2% del valore complessivo dell’appalto",
+    "value": "€ 6.720,00",
+    "page": 21,
+    "quote": "L’offerta è corredata, a pena di esclusione, da una garanzia provvisoria pari al 2% del valore complessivo dell’appalto ad esclusione dell’opzione di proroga e precisamente di importo pari ad € 6.720,00."
+  }
+]

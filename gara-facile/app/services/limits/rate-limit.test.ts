@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { clientIp, createLimiter, RateLimitError } from "./rate-limit";
+import { chatLimiter, clientIp, createLimiter, evolusLimiter, RateLimitError } from "./rate-limit";
 
 test("limits runs per key, in-flight duplicates and global concurrency", async () => {
   let clock = 0;
@@ -35,4 +35,19 @@ test("clientIp takes the first forwarded hop", () => {
   assert.equal(clientIp(new Headers({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" })), "203.0.113.7");
   assert.equal(clientIp(new Headers({ "x-real-ip": "198.51.100.2" })), "198.51.100.2");
   assert.equal(clientIp(new Headers()), "unknown");
+});
+
+test("shared chat and evolus limiters expose run", () => {
+  assert.equal(typeof chatLimiter.run, "function");
+  assert.equal(typeof evolusLimiter.run, "function");
+});
+
+test("chat-shaped limiter allows 30 runs per key, then isolates keys", async () => {
+  const now = () => 0;
+  const limiter = createLimiter({ max: 30, windowMs: 600_000, concurrent: 4, now });
+  const ok = () => Promise.resolve("done");
+
+  for (let i = 0; i < 30; i++) assert.equal(await limiter.run("chat:ip:1.1.1.1", ok), "done");
+  await assert.rejects(() => limiter.run("chat:ip:1.1.1.1", ok), RateLimitError);
+  assert.equal(await limiter.run("chat:ip:2.2.2.2", ok), "done");
 });

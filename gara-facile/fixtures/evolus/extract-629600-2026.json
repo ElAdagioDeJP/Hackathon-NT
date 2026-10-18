@@ -1,0 +1,51 @@
+[
+  {
+    "kind": "certification",
+    "description": "Essere Partner certificati Oracle per gli ambiti oggetto dell’affidamento",
+    "value": "Partner certificati Oracle",
+    "page": 9,
+    "quote": "essere Partner certificati Oracle per gli ambiti oggetto dell’affidamento"
+  },
+  {
+    "kind": "certification",
+    "description": "Essere Partner certificati Microsoft",
+    "value": "Partner certificati Microsoft",
+    "page": 9,
+    "quote": "essere Partner certificati Microsoft"
+  },
+  {
+    "kind": "min_turnover",
+    "description": "Fatturato globale annuo non inferiore nei migliori tre anni degli ultimi cinque anni",
+    "value": "€ 25.200.000,00",
+    "page": 9,
+    "quote": "aver conseguito un fatturato globale annuo non inferiore, nei migliori tre anni degli ultimi cinque anni precedenti a quello di indizione della procedura, a Euro 25.200.000,00 IVA esclusa"
+  },
+  {
+    "kind": "similar_projects",
+    "description": "Servizi analoghi e di complessità simile ultimati negli ultimi dieci anni",
+    "value": "€ 21.000.000,00",
+    "page": 9,
+    "quote": "aver conseguito ed ultimato con buon esito, negli ultimi dieci anni dalla data di indizione della presente procedura, servizi di importo complessivo pari ad almeno € 21.000.000,00 IVA esclusa, aventi oggetto i servizi analoghi e di complessità simile a quelli del presente affidamento"
+  },
+  {
+    "kind": "bid_guarantee",
+    "description": "Garanzia provvisoria pari al 2% dell’importo posto a base d’asta",
+    "value": "€ 420.772,88",
+    "page": 11,
+    "quote": "Le offerte presentate dai concorrenti devono essere corredate da una garanzia provvisoria pari al 2% dell’importo posto a base d’asta (e quindi pari ad € 420.772,88)"
+  },
+  {
+    "kind": "execution_deadline",
+    "description": "Durata complessiva dell'appalto",
+    "value": "60 mesi",
+    "page": 5,
+    "quote": "L’appalto avrà una durata di 60 mesi naturali e consecutivi"
+  },
+  {
+    "kind": "submission_deadline",
+    "description": "Termine ultimo per la presentazione delle offerte",
+    "value": "2026-11-15",
+    "page": 16,
+    "quote": "Le offerte, redatte in lingua italiana e complete della relativa documentazione devono essere presentate, a pena di esclusione dalla gara, entro e non oltre il giorno 15 novembre 2026"
+  }
+]

@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { AppSidebar } from "../components/app-sidebar";
 import { saveBusinessProfile } from "./actions";
 import { MatchPanel } from "./match-panel";
 import {
@@ -476,6 +476,55 @@ export default function BusinessForm({
     setStep(target);
   }
 
+  useEffect(() => {
+    function scrollToMatches() {
+      requestAnimationFrame(() => {
+        const panel = document.getElementById("matches");
+        panel?.focus({ preventScroll: true });
+        panel?.scrollIntoView();
+      });
+    }
+    function openMatches() {
+      if (reviewed && !initialError) {
+        setStep(3);
+        setErrors({});
+        scrollToMatches();
+      } else {
+        setNotice("Complete and approve your profile to see contract matches.");
+        requestAnimationFrame(() => {
+          document
+            .querySelector<HTMLElement>("form [role=status]")
+            ?.scrollIntoView({ block: "center" });
+        });
+      }
+    }
+    if (window.location.hash === "#matches") openMatches();
+    function onHashChange() {
+      if (window.location.hash === "#matches") openMatches();
+    }
+    function onDocumentClick(event: MouseEvent) {
+      const anchor =
+        event.target instanceof Element
+          ? event.target.closest("a")
+          : null;
+      if (anchor?.getAttribute("href") !== "/#matches") return;
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
+      setTimeout(() => openMatches(), 0);
+    }
+    window.addEventListener("hashchange", onHashChange);
+    document.addEventListener("click", onDocumentClick);
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      document.removeEventListener("click", onDocumentClick);
+    };
+  }, [reviewed, initialError]);
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy || initialError) return;
@@ -529,20 +578,17 @@ export default function BusinessForm({
       <a className="skip-link" href="#profile-form">
         Skip to form
       </a>
-      <aside className="sidebar" aria-label="Profile setup">
-        <Link href="/" className="brand" aria-label="Gara Facile home">
-          <Image
-            className="brand-mark"
-            src="/brand/gara-facile-mark.png"
-            alt=""
-            width={40}
-            height={40}
-            sizes="40px"
-            preload
-          />
-          gara facile
-        </Link>
-        <p className="sidebar-intro">Tenders that fit.</p>
+      <AppSidebar
+        current="profile"
+        label="Profile setup"
+        note={
+          <>
+            <Icon name="business" size={27} />
+            <p>Every opportunity starts with your business.</p>
+            <span>Your profile will help us find relevant public tenders.</span>
+          </>
+        }
+      >
         <nav className="step-nav" aria-label="Form sections">
           {STEPS.map((label, index) => (
             <button
@@ -562,12 +608,7 @@ export default function BusinessForm({
             </button>
           ))}
         </nav>
-        <div className="sidebar-note">
-          <Icon name="business" size={27} />
-          <p>Every opportunity starts with your business.</p>
-          <span>Your profile will help us find relevant public tenders.</span>
-        </div>
-      </aside>
+      </AppSidebar>
       <div className="workspace">
         <header className="topbar">
           <div className="breadcrumb">
@@ -576,6 +617,9 @@ export default function BusinessForm({
             <strong>Business profile</strong>
           </div>
           <div className="topbar-actions">
+            <Link className="text-button" href="/tenders">
+              Analyze tenders
+            </Link>
             <button
               className="text-button"
               type="button"

@@ -108,7 +108,7 @@ bun run build
 bun run test:files:http
 ```
 
-Tests use temporary directories and in-memory SQLite with the real migrations. They cover the local HTTP adapter, bearer auth, parent scoping, file signatures, bounded request bodies, concurrent quotas, failure cleanup, symlink/path escape rejection and downloads. The real AWS SDK is exercised against an in-process R2-compatible HTTP fixture, including a switch from R2 to local while preserving access to old objects. This does not constitute a live test against a configured cloud bucket.
+Tests use temporary directories and in-memory SQLite with the real migrations. They cover the local HTTP adapter, bearer auth, parent scoping, file signatures, bounded request bodies, concurrent quotas, failure cleanup, symlink/path escape rejection and downloads. On Windows expect 9/10 (known symlink failure: symlink escapes are rejected before the privilege-dependent check). The real AWS SDK is exercised against an in-process R2-compatible HTTP fixture, including a switch from R2 to local while preserving access to old objects. This does not constitute a live test against a configured cloud bucket.
 
 Profile tests cover draft persistence, approval, expiry, session ownership, same-origin mutations, browser-authorized document operations and protection of profiles already used for matching.
 

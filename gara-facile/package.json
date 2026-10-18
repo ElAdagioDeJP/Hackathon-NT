@@ -19,7 +19,9 @@
     "test:profiles": "tsx --test app/services/business/*.test.ts",
     "test:match": "tsx --test app/services/match/*.test.ts",
     "test:limits": "tsx --test app/services/limits/*.test.ts",
-    "ai:extract-fixtures": "tsx --env-file=.env scripts/extract-fixtures.ts"
+    "test:tenders": "tsx --test app/tenders/*.test.ts",
+    "ai:extract-fixtures": "tsx --env-file=.env scripts/extract-fixtures.ts",
+    "bench": "tsx scripts/benchmark.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",

@@ -1,0 +1,23 @@
+[
+  {
+    "kind": "min_turnover",
+    "description": "L'operatore economico deve aver realizzato un fatturato globale maturato nei migliori tre anni degli ultimi cinque precedenti alla pubblicazione della gara.",
+    "value": "€ 800.000,00",
+    "page": 15,
+    "quote": "L’operatore economico deve aver realizzato un fatturato globale maturato nei migliori tre (3) anni degli ultimi cinque (2021-2022-2023-2024-2025) precedenti a quello in cui è stata pubblicata la gara almeno pari ad € 800.000,00 IVA e/o altre imposte e contributi di legge escluse"
+  },
+  {
+    "kind": "bid_guarantee",
+    "description": "L'offerta deve essere corredata da una garanzia provvisoria pari al 2% del valore complessivo dell'appalto.",
+    "value": "€ 11.102,21",
+    "page": 21,
+    "quote": "L’offerta è corredata, a pena di esclusione, da una garanzia provvisoria ex art. 53 comma 1, del D.lgs. n. 36/2023, pari al 2% del valore complessivo dell’appalto e precisamente di importo pari a € 11.102,21 (undicimilacentodue/21 €)"
+  },
+  {
+    "kind": "execution_deadline",
+    "description": "La fornitura e posa in opera delle attrezzature deve avvenire entro un termine stabilito dal verbale di avvio.",
+    "value": "60 giorni naturali e consecutivi",
+    "page": 11,
+    "quote": "La fornitura e posa in opera delle attrezzature di cui al Cod F come specificato al paragrafo 1.6 dell’elaborato EL.02 _ CAPITOLATO SPECIALE D’APPALTO dovrà avvenire entro 60 giorni naturali e consecutivi decorrenti dal verbale di avvio della fornitura sottoscritto dal DEC e dall’appaltatore."
+  }
+]

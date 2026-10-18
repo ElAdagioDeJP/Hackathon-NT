@@ -13,8 +13,8 @@ Alcance: **todo el apartado de IA** (infra AMD, modelos, extracción, reglas/mat
 |---|---|
 | Alcance | Piso garantizado = vertical slice (a) → luego (b) benchmark + traductor → luego (c) extras. |
 | Casos de demo | PyME **italiana de software**; 3 licitaciones **reales de TED, cacheadas** como fixture; PDFs curados. Requisitos coherentes con software (ISO 27001, calificación cloud AgID, facturación, garantía, proyectos similares, plazo). **No usar "SOA OS30"** (es de obras eléctricas). |
-| Búsqueda TED | **Toda la UE, sin filtro de país** → los pliegos pueden venir en varios idiomas; la extracción debe ser multilingüe y el borrador sale en el idioma del pliego (en la demo: italiano). Solo avisos de competencia activos. |
-| Modelos | **Opción 3**: Gemma (clase 27B instruct) para **redactar y traducir** + Qwen2.5 instruct (7B–14B) con `--tool-call-parser hermes` para **extracción y agente/tool-calling**, ambos en **1 MI300X**. **Plan B (opción 1)**: Gemma 27B para todo. |
+| Búsqueda TED | **Lugar de ejecución según la cobertura del perfil** (local/nacional → país propio; internacional → países elegidos); sin filtro por país fijo ni filtro CPV (fuera de alcance) → los pliegos pueden venir en varios idiomas; la extracción debe ser multilingüe y el borrador sale en el idioma del pliego (en la demo: italiano). Solo avisos de competencia activos. |
+| Modelos | **Gemma-4-31B-IT para todo** vía AMD Token Factory (endpoint OpenAI-compatible, 20 RPM). La opción 3 (Gemma + Qwen2.5 en 1 MI300X propio) se **descartó**: sin créditos para droplet. |
 | Extracción | **Híbrido**: parser propio por página (garantiza nº de página) + LLM extrae requisitos en JSON. Evolus como bloque (extractor + knowledge library + workflow), no como único camino. |
 | Reglas | **6 tipos fijos**: certificación, facturación mínima, garantía provisional %, proyectos similares (nº y valor), plazo de ejecución/entrega, deadline de oferta. **El LLM jamás decide elegibilidad**: reglas en código. |
 | Reclamos | Abogado/PwC = "validador futuro", no partner. Solo mostrar números **medidos**. |
@@ -27,7 +27,7 @@ TED (searchNotices, ya existe) ──► contracts + lotes (DB)
                                         │
          PDF del pliego ──► [Dev B] parser por página ──► páginas[{n, texto}]
                                         │
-                              [Dev B] extractor LLM (Qwen, JSON guiado)
+                              [Dev B] extractor LLM (Gemma, JSON guiado)
                                         │  Requirement[]  (con page + quote)
                                         ▼
  Ficha empresa (DB + Evolus library) ──► [Dev B] motor de reglas (código puro)
@@ -38,10 +38,9 @@ TED (searchNotices, ya existe) ──► contracts + lotes (DB)
                               Humano aprueba (nunca envía solo)
 ```
 
-- Todo el LLM entra por **una interfaz OpenAI-compatible** con dos pares de variables, para poder cambiar de opción 3 a opción 1 solo con config:
+- Todo el LLM entra por **una interfaz OpenAI-compatible** con dos pares de variables (una por rol); ambas apuntan al mismo modelo Gemma en Token Factory:
   - `LLM_EXTRACT_BASE_URL`, `LLM_EXTRACT_MODEL`, `LLM_EXTRACT_API_KEY`
   - `LLM_DRAFT_BASE_URL`, `LLM_DRAFT_MODEL`, `LLM_DRAFT_API_KEY`
-  - Si ambos pares apuntan al mismo servidor/modelo = plan B.
 - Evolus (de `evolus doc.rar`, ver `04-developers/`): `EVOLUS_API_KEY`, `EVOLUS_APP_ID`, `EVOLUS_AGENT_ID`, `EVOLUS_WORKFLOW_ID`, `EVOLUS_LIBRARY_ID`. Headers REST: `X-ApiKey` y `X-Application-Id`.
 - Código nuevo va en `gara-facile/app/services/ai/` (nada de IA dentro de `app/services/TED` ni `business`).
 
@@ -92,40 +91,26 @@ Reglas del contrato:
 
 ## 3. Dev A — Inferencia, redacción, traducción, benchmark
 
-Dueño de: AMD + vLLM + cliente LLM + borrador + traducción + panel AMD + benchmark.
+Dueño de: AMD (Token Factory) + cliente LLM + borrador + panel AMD + benchmark. Traducción: descartada (no existe `ai/translate.ts`).
 
-### A1. Droplet MI300X + vLLM (primera hora; bloquea al Dev B para pruebas reales)
-1. Crear droplet MI300X en AMD Developer Cloud (cuenta con créditos ya lista). **Apagar/destruir cuando no se use**; anotar IP.
-2. Aceptar la licencia de Gemma en Hugging Face y crear `HF_TOKEN`.
-3. Levantar **en secuencia** (no simultáneo, el profiling de memoria puede chocar), con API key (`--api-key`, endpoint nunca abierto):
-   ```bash
-   # Orientativo: verificar imagen/versiones ROCm de vLLM al momento
-   # 1) Gemma (~55% VRAM)
-   vllm serve <gemma-27b-instruct> --host 0.0.0.0 --port 8000 \
-     --api-key "$LLM_DRAFT_API_KEY" --gpu-memory-utilization 0.55 --max-model-len 16384
-   # 2) Qwen (~25% VRAM), esperar a que Gemma esté arriba
-   vllm serve Qwen/Qwen2.5-7B-Instruct --host 0.0.0.0 --port 8001 \
-     --api-key "$LLM_EXTRACT_API_KEY" --gpu-memory-utilization 0.25 \
-     --enable-auto-tool-choice --tool-call-parser hermes --max-model-len 32768
-   ```
-4. Guardar scripts en `infra/amd/` (`serve-gemma.sh`, `serve-qwen.sh`, `README`) para reproducir en 5 min.
-5. **Puerta (≤2 h)**: ambos responden a `curl /v1/chat/completions`; Qwen pasa una prueba de **JSON guiado** (`response_format`/`guided_json`). Si no → **Plan B**: Gemma 27B sirve todo, Qwen se descarta, solo se cambia la config.
-6. Pedir también acceso por red desde Dokploy (puertos 8000/8001 con key, idealmente limitando IP origen).
+### A1. Droplet MI300X + vLLM — DESCARTADO
+
+Sin créditos para droplet propio: no se levantó ninguna MI300X ni ningún vLLM. El modelo es **Gemma-4-31B-IT vía AMD Token Factory** (endpoint OpenAI-compatible, ver `LLM_*` en `.env.example`). Los scripts de `infra/amd/` (`serve-gemma.sh`, `serve-qwen.sh`, `README`) quedan solo como referencia para reproducir ese montaje en el futuro.
 
 ### A2. Cliente LLM y observabilidad
 - `ai/llm.ts`: `chat({ role: "extract"|"draft", messages, schema?, signal })` sobre `fetch` OpenAI-compatible; timeout, 1 reintento, validación de JSON con `zod` (o similar).
-- Medir por llamada: ms, tokens in/out, modelo. Guardar en tabla `ai_runs` (o log JSON) → alimenta el **panel AMD** (modelo, GPU, tokens/s, costo/min).
-- Endpoint `GET /api/ai/health` que consulta `/v1/models` de ambos servidores (la demo muestra "AMD MI300X · Gemma + Qwen · ✔").
+- Medir por llamada: ms, tokens in/out, modelo. Guardar en tabla `ai_runs` → alimenta el **panel AMD** (modelo, GPU, llamadas, ms, tokens/s; sin costo/min). Visible en `/tenders` (*Running on AMD*) y `GET /api/ai/amd-stats`.
+- Endpoint `GET /api/ai/health` que consulta `/v1/models` del servidor de Token Factory (la demo muestra modelo + ✔).
 
 ### A3. Borrador de oferta (Gemma)
 - `ai/draft.ts`: entrada = `Requirement[]` + `ComplianceResult[]` + ficha empresa (+ proyectos de referencia) → salida = borrador estructurado (secciones: presentación, experiencia, plan de ejecución, cumplimiento de requisitos) **en el idioma del pliego** (demo: italiano).
 - Reglas anti-alucinación: el prompt solo permite usar datos de la ficha; cada afirmación numérica se rellena **desde campos**, el LLM solo redacta alrededor. Marca "Generado con IA — revisar" en cada sección.
 - Sin `status=FAILS` críticos no se genera (o se genera con advertencias visibles).
-- Criterio de aceptación: borrador completo en < 60 s en la MI300X para el lote verde de la demo; tiempo medido y guardado.
+- Criterio de aceptación: borrador completo medido y guardado (un borrador real: 53,149 ms, 1,010 prompt tokens, 408 completion tokens, vía Token Factory).
 
-### A4. Traducción + rerank (fase b/c)
-- `ai/translate.ts`: traduce `description`/`quote` de requisitos a inglés/español/italiano para la matriz (Gemma). Cachear por hash.
-- Dado que la búsqueda es **toda la UE**: detectar idioma del pliego y traducir para mostrar. Opcional: rerank de evidencia.
+### A4. Traducción — DESCARTADA
+
+No existe `ai/translate.ts`. La matriz muestra `description`/`quote` en el idioma del pliego (demo: italiano); no se traduce ni se hace rerank.
 
 ### A5. Benchmark (fase b)
 - `scripts/benchmark.ts`: sobre el set etiquetado de Dev B, medir (1) precisión/recall de requisitos, (2) % de decisiones correctas de la matriz, (3) tiempo end-to-end por licitación, (4) tokens y costo estimado en la GPU. Salida a `docs/benchmark.md` con fecha y comando para reproducir.
@@ -136,17 +121,16 @@ Dueño de: AMD + vLLM + cliente LLM + borrador + traducción + panel AMD + bench
 Dueño de: parser, extractor, motor de reglas, score, set de evaluación, bloques Evolus.
 
 ### B1. Parser de pliegos por página
-- `ai/pdf.ts`: PDF → `[{ page: number, text: string }]` (por ejemplo `pdfjs-dist` o `unpdf`; probar con los 3 PDFs de la demo). Si una página sale vacía (escaneo) → marcar `needsOcr`, y para el demo preferir PDFs con texto.
-- Guardar resultado en `business_documents`-like para pliegos (nueva tabla `tender_documents`: url, hash, páginas JSON) y no reprocesar si el hash no cambió.
-- Los pliegos salen de `document-url-lot`/links del aviso TED; para la demo, **PDFs locales fijados** en `fixtures/tenders/`.
+- `ai/pdf.ts`: PDF → `[{ page: number, text: string }]` con `unpdf` (probado con los 3 PDFs de la demo). Si una página sale vacía (escaneo) → marcar `needsOcr`; para la demo se usan PDFs con texto.
+- Requisitos guardados y revisados en `fixtures/tenders/<id>.requirements.json`; el análisis los reutiliza y solo extrae en vivo si faltan. Pliegos demo fijados en `fixtures/tenders/`; tablas `tender_documents` y `tenderAnalyses` en DB.
 
-### B2. Extractor de requisitos (Qwen)
+### B2. Extractor de requisitos (Gemma)
 - `ai/extract.ts`: por ventanas de páginas (p. ej. 6–8 páginas), prompt + **JSON schema** de `Requirement[]` (6 tipos). Fusionar y deduplicar; descartar items sin `page`+`quote`; verificar que `quote` aparezca realmente en el texto de esa página (comprobación determinista → mata alucinaciones).
 - Normalizar umbrales (`€1.500.000` → `1500000`, `2%` → `0.02`, "90 giorni" → `90 days`).
 - Prompts versionados en `ai/prompts/`.
 
 ### B3. Ficha de empresa → hechos
-- Completar el perfil (hoy en DB pero sin UI): `cpvCodes`, `certifications`, `languages`, facturación anual (3 años), nº empleados, PyME sí/no, rango de contrato, proyectos de referencia (nombre, valor, año, cliente público). Coordinar con quien haga la UI del wizard.
+- Completar el perfil (campos + UI del wizard ya entregados: `cpvCodes`, `certifications`, `languages`, facturación anual, nº empleados, PyME, rango de contrato, proyectos de referencia).
 - `ai/profileFacts.ts`: devuelve `CompanyFacts` tipado; la demo usa una empresa ficticia de software italiana ("Load example").
 
 ### B4. Motor de reglas (código puro, tests obligatorios)
@@ -165,29 +149,31 @@ Dueño de: parser, extractor, motor de reglas, score, set de evaluación, bloque
 - Mantenerlo pequeño pero real: es lo que respalda "precisión de la matriz".
 
 ### B6. Bloques Evolus (mínimo 2; el workspace ya está creado)
-Prioridad:
-1. **Knowledge library** con la ficha de la empresa (documentos de certificados/proyectos). Subir con `POST /api/v1/memories/{LIBRARY_ID}/documents?language=it` (¡`language` explícito; por defecto es `it`!).
-2. **Extractor** de documentos: schema de `Requirement[]`, llamado como **segunda opinión** del extractor propio (`.../json/{EXTRACTOR_ID}/ask-file`, con `?useWebhook=false`). Mostrar la comparación en el panel.
-3. **Workflow diario TED** (disparador por horario) que llama a un endpoint nuestro o al TED y guarda resultados. *Activarlo: nacen en pausa (409 si no).*
-4. **Agente**: chat sobre la ficha con modelo propio (BYOM → URL del vLLM + API key + test de conexión; requiere modelo con function calling → por eso Qwen/hermes).
+Prioridad (todo entregado):
+1. **Knowledge library** con la ficha de la empresa (documentos de certificados/proyectos). Subir con `POST /api/v1/memories/{LIBRARY_ID}/documents?language=it` (¡`language` explícito!).
+2. **Extractor** de documentos: schema de `Requirement[]`, llamado como **segunda opinión** del extractor propio (`/agents/{EVOLUS_EXTRACTOR_AGENT_ID}/json/{EVOLUS_EXTRACTOR_ID}/ask-file`, con `?useWebhook=false`). La comparación se muestra en `/tenders` (*Evolus vs our extractor*).
+3. **Workflow** *Tender intake* (Start → extractor → Assistant → output); las rutas `POST /api/ai/evolus/workflow` y `GET …/{executionId}` existen.
+4. **Agente**: chat sobre la ficha con el modelo conectado (BYOM → Token Factory, Gemma). Claves **solo en variables de entorno** (`EVOLUS_AGENT_ID`, `EVOLUS_MATCH_AGENT_ID`); la ruta `POST /api/ai/chat` existe pero ninguna UI la usa (la UI es el widget).
 - Claves **solo en variables de entorno**; el equipo de Evolus revisa uso de API y configuración del workspace, así que las llamadas deben quedar registradas (usar la REST API, no solo la UI).
 
 ## 5. Dependencias con el resto del equipo
 
-- **TED**: `app/services/TED/fetch.ts` ya existe pero sin retry/paginación/dedupe y sin filtro de tipo de aviso. Quien haga la ingesta debe filtrar **solo avisos de competencia activos** (`cn-standard`, `cn-social`, `pin-cfc-standard`), pedir también `submission-url-lot`, `document-url-lot` y hacer fallback lote→procedimiento. Dev B consume el resultado, no lo reescribe.
-- **DB**: `contracts` y `contract_matches` hoy son mínimas; necesitan CPV, valor, deadline, URLs y lotes. Acordar migración con el responsable de backend **antes** de que Dev B persista análisis. Mientras, `TenderAnalysis` puede guardarse como JSON en una tabla nueva `tender_analyses`.
-- **UI**: lista de licitaciones (verde/rojo), detalle con matriz, panel AMD y botón "Aprobar". Deben leer `TenderAnalysis`.
-- **Deploy (Dokploy)**: la app debe poder llamar a `LLM_*_BASE_URL`; el droplet debe aceptar la IP de Dokploy.
+- **TED**: `app/services/TED/fetch.ts` con caller real (*Find matches*): solo avisos de competencia activos, con `submission-url-lot`, `document-url-lot` y fallback lote→procedimiento. Lugar de ejecución según cobertura del perfil; sin filtro CPV (fuera de alcance).
+- **DB**: `TenderAnalysis` se guarda como JSON en la tabla `tenderAnalyses`; contratos y matches en `contracts`/`contract_matches`.
+- **UI**: lista de licitaciones en `/tenders` (rojo/verde), detalle con matriz, panel AMD y botón "Aprobar". Leen `TenderAnalysis`.
+- **Deploy (Dokploy)**: la app llama a `LLM_*_BASE_URL` (Token Factory) desde `garefacile.empovaro.com`.
 
 ## 6. Seguridad y reglas de oro
 
 - **Las llaves viven solo en `.env` / variables de Dokploy. Nunca en git, logs, capturas ni chat.** La `EU_API_KEY` de TED y la llave `rc-…` de Evolus ya circularon por chat: tratarlas como expuestas y rotar al terminar el hackathon (o ya si el chat es compartido).
 - `.env` ya está ignorado por git; verificar con `git status` antes de cada commit. Añadir las variables nuevas a `.env.example` (sin valores).
-- vLLM siempre con `--api-key`. Nada de endpoints abiertos.
+- Sin endpoints abiertos: toda llamada LLM lleva su API key desde env.
 - El agente **nunca envía** ofertas; solo propone, el humano aprueba. Etiquetar contenido generado por IA.
 - No presentar métricas no medidas como medidas. El deck decía 92 %, 4'37'', 25 min: son metas hasta que `docs/benchmark.md` las respalde.
 
-## 7. Cronograma sugerido (ajustar al reloj real; hora Venezuela)
+## 7. Cronograma (histórico: el evento ya cerró)
+
+Se conserva como registro. La entrega fue 18 oct 10:00 AM VET; el plan B (Gemma para todo vía Token Factory) se convirtió en el plan final y se sacrificaron traductor, rerank y vLLM propio.
 
 | Bloque | Dev A | Dev B | Puerta |
 |---|---|---|---|
@@ -204,13 +190,15 @@ Prioridad:
 
 Si algo falla en una puerta, **recortar, no retrasar**: primero se sacrifican traducción, rerank, agente Evolus y workflow diario; el piso es matriz + borrador + panel AMD + 2 bloques Evolus.
 
+> Lo sacrificado al final: traductor, rerank, filtro CPV, pantalla de asistente in-app y vLLM propio (ver §8).
+
 ## 8. Definition of Done (IA)
 
-- [ ] Gemma sirve en vLLM sobre MI300X; panel AMD visible en la app.
-- [ ] 3 pliegos demo → `Requirement[]` con página y cita verificable.
-- [ ] Matriz determinista con los 6 tipos; tests de reglas pasan.
-- [ ] 2 rojos y 1 verde coherentes con la empresa ficticia; score reproducible.
-- [ ] Borrador en italiano generado en AMD, con aviso IA y aprobación humana.
-- [ ] ≥2 bloques Evolus usados por REST con llaves en entorno.
-- [ ] `docs/benchmark.md` con números medidos y comando para reproducir.
-- [ ] Todo corre con `docker compose up` desde cero y en `garefacile.empovaro.com`.
+- [x] Gemma sirve vía AMD Token Factory (vLLM propio en MI300X descartado); panel AMD visible en la app.
+- [x] 3 pliegos demo → `Requirement[]` con página y cita verificable.
+- [x] Matriz determinista con los 6 tipos; tests de reglas pasan.
+- [x] 2 rojos y 1 verde coherentes con la empresa ficticia; score reproducible.
+- [x] Borrador en italiano generado en AMD, con aviso IA y aprobación humana.
+- [x] ≥2 bloques Evolus usados por REST con llaves en entorno.
+- [x] `docs/benchmark.md` con números medidos y comando para reproducir.
+- [x] Todo corre con `docker compose up` desde cero y en `garefacile.empovaro.com`.

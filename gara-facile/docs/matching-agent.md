@@ -8,12 +8,14 @@ Configure one Evolus agent in your hackathon workspace to perform **Matching**. 
 EVOLUS_API_KEY=
 EVOLUS_APP_ID=
 EVOLUS_AGENT_ID=
+# Matching agent used by Find matches (falls back to EVOLUS_AGENT_ID when unset)
+EVOLUS_MATCH_AGENT_ID=
 # Optional override; default https://api.evolus.ai/v1
 EVOLUS_BASE_URL=
 EU_API_KEY=
 ```
 
-`model` is sent as `${EVOLUS_APP_ID}:${EVOLUS_AGENT_ID}`. Each Find matches run is a new conversation (no `X-Conversation-Id`).
+`model` is sent as `${EVOLUS_APP_ID}:${EVOLUS_MATCH_AGENT_ID}` (the *matching* agent id, not the assistant's) for this flow. Each Find matches run is a new conversation (no `X-Conversation-Id`).
 
 ## Expected JSON contract
 

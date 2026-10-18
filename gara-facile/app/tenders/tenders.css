@@ -1,0 +1,299 @@
+.tender-banner {
+  background: var(--surface);
+  padding: 16px 20px;
+  margin-bottom: 32px;
+  overflow-wrap: anywhere;
+}
+
+.busy-note {
+  margin-top: 12px;
+  color: var(--muted);
+}
+
+.tender-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.tender-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 2px solid transparent;
+  padding: 16px 18px;
+  color: var(--navy);
+}
+
+.tender-card:hover {
+  border-color: var(--navy);
+}
+
+.tender-card.selected {
+  border-color: var(--navy);
+  background: #e8edf5;
+}
+
+.tender-card-title {
+  font-weight: 500;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.tender-card-meta {
+  font-size: 14px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.verdict,
+.status-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.verdict-go,
+.status-meets {
+  background: #dcebe2;
+  color: var(--success);
+}
+
+.verdict-nogo,
+.status-fails {
+  background: #f6e0e0;
+  color: var(--danger);
+}
+
+.verdict-review,
+.status-missing {
+  background: #fbeecd;
+  color: #8b4b00;
+}
+
+.matrix {
+  margin-top: 20px;
+  min-width: 0;
+}
+
+.matrix-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.matrix-score {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.matrix-meta {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.req-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.req-table th,
+.req-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.req-table th {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.req-kind,
+.req-evidence {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.evolus-box,
+.amd-box {
+  margin-top: 32px;
+  padding: 20px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.evolus-box h2,
+.amd-box h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.evolus-box h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 14px 0 6px;
+}
+
+.evolus-box ul,
+.amd-roles {
+  margin: 0;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+
+.evolus-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 20px;
+}
+
+.draft-panel {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.draft-panel textarea {
+  border: 1px solid var(--line);
+  padding: 13px 14px;
+  background: white;
+  width: 100%;
+  color: var(--navy);
+  min-height: 150px;
+  resize: vertical;
+}
+
+.draft-panel textarea[readonly] {
+  background: var(--surface);
+}
+
+.draft-warnings {
+  margin: 0;
+  padding: 14px 14px 14px 34px;
+  background: #fbeecd;
+  color: var(--navy);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.draft-approved {
+  display: inline-block;
+  align-self: flex-start;
+  background: #dcebe2;
+  color: var(--success);
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.amd-roles {
+  margin-top: 8px;
+}
+
+.health-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-ok {
+  background: var(--success);
+}
+
+.dot-fail {
+  background: var(--danger);
+}
+
+section[aria-labelledby] + section[aria-labelledby],
+section.amd-box {
+  margin-top: 40px;
+}
+
+@media (max-width: 680px) {
+  .evolus-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .evolus-box,
+  .amd-box {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .req-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+    padding: 0;
+  }
+
+  .req-table,
+  .req-table tbody,
+  .req-table tr,
+  .req-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .req-table tr {
+    background: var(--surface);
+    margin-bottom: 12px;
+    padding: 6px 14px;
+  }
+
+  .req-table td {
+    border-bottom: 0;
+    padding: 8px 0;
+  }
+
+  .req-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+}

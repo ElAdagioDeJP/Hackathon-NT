@@ -56,7 +56,7 @@ export function MatchPanel({ enabled }: { enabled: boolean }) {
   const lastRun = matches[0]?.matchedAt;
 
   return (
-    <section className="match-panel" aria-label="Contract matches">
+    <section className="match-panel" id="matches" tabIndex={-1} aria-label="Contract matches">
       <div className="match-panel-header">
         <div>
           <h2>Contract matches</h2>

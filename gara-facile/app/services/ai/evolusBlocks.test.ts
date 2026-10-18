@@ -127,13 +127,62 @@ test("workflow execution status is read from the executions endpoint", async () 
 });
 
 test("missing configuration and Evolus errors map to HTTP statuses", async () => {
-  await assert.rejects(
-    startTenderWorkflow(pdf, "t.pdf", "x", { env: { ...env, EVOLUS_WORKFLOW_ID: "" } as NodeJS.ProcessEnv }),
-    /EVOLUS_WORKFLOW_ID/,
-  );
-  assert.equal(evolusErrorResponse(new EvolusApiError("Evolus is not configured. Missing X.")).status, 503);
-  assert.equal(evolusErrorResponse(new EvolusApiError("no credits", { status: 402 })).status, 402);
-  assert.equal(evolusErrorResponse(new EvolusApiError("paused", { status: 409 })).status, 409);
-  assert.equal(evolusErrorResponse(new EvolusApiError("boom", { status: 500 })).status, 502);
-  assert.throws(() => evolusErrorResponse(new Error("other")));
+  const original = console.error;
+  console.error = () => {};
+  try {
+    await assert.rejects(
+      startTenderWorkflow(pdf, "t.pdf", "x", { env: { ...env, EVOLUS_WORKFLOW_ID: "" } as NodeJS.ProcessEnv }),
+      /EVOLUS_WORKFLOW_ID/,
+    );
+    assert.equal(evolusErrorResponse(new EvolusApiError("Evolus is not configured. Missing X.")).status, 503);
+    assert.equal(evolusErrorResponse(new EvolusApiError("no credits", { status: 402 })).status, 402);
+    assert.equal(evolusErrorResponse(new EvolusApiError("paused", { status: 409 })).status, 409);
+    assert.equal(evolusErrorResponse(new EvolusApiError("boom", { status: 500 })).status, 502);
+    assert.throws(() => evolusErrorResponse(new Error("other")));
+  } finally {
+    console.error = original;
+  }
+});
+
+test("evolusErrorResponse never leaks the raw provider message", async () => {
+  const original = console.error;
+  console.error = () => {};
+  try {
+    const cases: { error: EvolusApiError; status: number; body: string }[] = [
+      {
+        error: new EvolusApiError("secret provider body xyz", { status: 500 }),
+        status: 502,
+        body: "Evolus is temporarily unavailable. Try again later.",
+      },
+      {
+        error: new EvolusApiError("secret provider body xyz", { status: 402 }),
+        status: 402,
+        body: "Evolus credits are exhausted.",
+      },
+      {
+        error: new EvolusApiError("secret provider body xyz", { status: 409 }),
+        status: 409,
+        body: "The Evolus agent is paused or busy.",
+      },
+      {
+        error: new EvolusApiError("secret provider body xyz", { status: 429 }),
+        status: 429,
+        body: "Evolus is rate limiting requests. Try again later.",
+      },
+      {
+        error: new EvolusApiError("Evolus is not configured. Missing X secret xyz"),
+        status: 503,
+        body: "Evolus is not configured.",
+      },
+    ];
+    for (const { error, status, body } of cases) {
+      const res = evolusErrorResponse(error);
+      assert.equal(res.status, status);
+      const json = (await res.json()) as { error: string };
+      assert.equal(json.error, body);
+      assert.ok(!json.error.includes("xyz"));
+    }
+  } finally {
+    console.error = original;
+  }
 });
