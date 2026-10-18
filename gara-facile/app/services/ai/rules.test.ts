@@ -52,6 +52,10 @@ test("normalizes thresholds deterministically", () => {
   assert.equal(parsePercent("2%"), 0.02);
   assert.equal(parsePercent(0.02), 0.02);
   assert.equal(parsePercent(2), 0.02);
+  // Whole numbers are percents: a 1 % guarantee is not 100 % of the lot.
+  assert.equal(parsePercent(1), 0.01);
+  assert.equal(parsePercent("1"), 0.01);
+  assert.equal(parsePercent(0.5), 0.5);
   assert.equal(parseDays("90 giorni"), 90);
   assert.equal(parseDays("6 mesi"), 180);
   assert.equal(parseDays("90 days"), 90);
@@ -113,6 +117,7 @@ test("bid_guarantee: percent of lot value, absolute, unknown lot value", () => {
   assert.equal(status(req({ kind: "bid_guarantee", value: 0.02, unit: "%" })), "MEETS"); // 8k ≤ 10k
   assert.equal(status(req({ kind: "bid_guarantee", value: "2%" }), company, { ...tender, estimatedValueEur: 600_000 }), "FAILS"); // 12k
   assert.equal(status(req({ kind: "bid_guarantee", value: 10_000, unit: "EUR" })), "MEETS");
+  assert.equal(status(req({ kind: "bid_guarantee", value: 1, unit: "%" })), "MEETS"); // 4k ≤ 10k
   assert.equal(status(req({ kind: "bid_guarantee", value: 0.02 }), company, { ...tender, estimatedValueEur: undefined }), "MISSING_DOC");
   assert.equal(status(req({ kind: "bid_guarantee", value: 0.02 }), { ...company, bidGuaranteeCapacityEur: undefined }), "MISSING_DOC");
 });

@@ -28,14 +28,15 @@ export function parseAmount(input: unknown): number | undefined {
   return value;
 }
 
-// "2%", "2 %", 2 (percent), 0.02 (fraction) → fraction.
+// "2%", "2 %", 2 (percent), 0.02 (fraction) → fraction. Values from 1 up are
+// percents: no tender asks for a guarantee of 100 % of the lot.
 export function parsePercent(input: unknown): number | undefined {
-  if (typeof input === "number") return input > 1 ? input / 100 : input;
+  if (typeof input === "number") return input >= 1 ? input / 100 : input;
   if (typeof input !== "string") return undefined;
   const match = input.replace(",", ".").match(/(\d+(?:\.\d+)?)/);
   if (!match) return undefined;
   const value = Number(match[1]);
-  return input.includes("%") || value > 1 ? value / 100 : value;
+  return input.includes("%") || value >= 1 ? value / 100 : value;
 }
 
 const DAY_UNITS: [RegExp, number][] = [
