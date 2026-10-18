@@ -203,21 +203,48 @@ test("browser files require the owning session and same-origin mutations, withou
   }
 });
 
-test("profiles already referenced by matching cannot be silently overwritten", () => {
+test("editing a matched profile clears its stale ledger; submissions freeze it", async () => {
   const f = fixture();
+  const directory = await mkdtemp(join(tmpdir(), "gara-profile-test-"));
   try {
     const owner = f.service.save(undefined, complete, true, true);
-    f.sqlite.exec(
-      `INSERT INTO contracts (id, title, url) VALUES ('TED-1', 'Test', 'https://example.test'); INSERT INTO contract_matches (contract_id, business_record_id) VALUES ('TED-1', ${owner.saved.recordId});`,
+    const id = owner.saved.recordId;
+    const matches = () =>
+      (f.sqlite.prepare("SELECT count(*) AS c FROM contract_matches").get() as { c: number }).c;
+    const match = () =>
+      f.sqlite.exec(
+        `INSERT OR IGNORE INTO contracts (id, title, url) VALUES ('TED-1', 'Test', 'https://example.test'); INSERT INTO contract_matches (contract_id, business_record_id) VALUES ('TED-1', ${id});`,
+      );
+    match();
+    const edited = f.service.save(owner.newToken, { ...complete, city: "Valencia" }, true);
+    assert.equal(edited.saved.profile.city, "Valencia");
+    assert.equal(edited.saved.status, "draft");
+    assert.equal(matches(), 0);
+
+    const files = createDocumentService(
+      f.db,
+      createDocumentStorage({ provider: "local", localDirectory: directory }),
     );
+    match();
+    const pdf = () => new File(["%PDF-1.4\n%%EOF\n"], "portfolio.pdf");
+    const doc = await files.upload(id, pdf(), "context");
+    assert.equal(matches(), 0);
+    match();
+    await files.remove(id, doc.id);
+    assert.equal(matches(), 0);
+
+    match();
+    f.sqlite.exec("INSERT INTO submissions (contract_match_id, content) SELECT id, X'01' FROM contract_matches");
     assert.throws(
-      () =>
-        f.service.save(owner.newToken, { ...complete, city: "Valencia" }, true),
-      /new profile version/,
+      () => f.service.save(owner.newToken, { ...complete, city: "Bilbao" }, true),
+      /submissions/,
     );
-    assert.equal(f.service.get(owner.newToken)?.profile.city, "Madrid");
+    assert.equal(f.service.get(owner.newToken)?.profile.city, "Valencia");
+    await assert.rejects(() => files.upload(id, pdf(), "context"), /submissions/);
+    assert.equal(matches(), 1);
   } finally {
     f.sqlite.close();
+    await rm(directory, { recursive: true, force: true });
   }
 });
 

@@ -5,8 +5,8 @@ import {
   businesses,
   businessProfileSessions,
   businessRecords,
-  contractMatches,
 } from "../../db/schema";
+import { clearStaleLedger, hasSubmissions } from "../match/store";
 import { parseProfile } from "../../business-profile/validation";
 import type { ProfileErrors, SavedProfile } from "../../business-profile/types";
 
@@ -115,16 +115,11 @@ export function createProfileService(db: BetterSQLite3Database) {
             updatedAt: new Date(),
           };
           if (id) {
-            if (
-              tx
-                .select({ id: contractMatches.id })
-                .from(contractMatches)
-                .where(eq(contractMatches.businessRecordId, id))
-                .get()
-            )
+            if (hasSubmissions(tx, id))
               throw new ProfileError(
-                "This profile is already used for matching. A new profile version is required before editing it.",
+                "This profile already has submissions drafted from its matches and can no longer be edited.",
               );
+            clearStaleLedger(tx, id);
             const record = tx
               .select()
               .from(businessRecords)

@@ -3,11 +3,8 @@ import { extname } from "node:path";
 import { and, count, eq } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import { fileTypeFromBuffer } from "file-type";
-import {
-  businessDocuments,
-  businessRecords,
-  contractMatches,
-} from "../../db/schema";
+import { businessDocuments, businessRecords } from "../../db/schema";
+import { clearStaleLedger, hasSubmissions } from "../match/store";
 import { FileApiError, StoredFileNotFound } from "./errors";
 import type { DocumentStorage } from "./storage";
 
@@ -142,18 +139,15 @@ export function createDocumentService(
         "A profile can have up to 5 files per category.",
       );
   }
-  function requireEditable(recordId: number) {
-    if (
-      db
-        .select({ id: contractMatches.id })
-        .from(contractMatches)
-        .where(eq(contractMatches.businessRecordId, recordId))
-        .get()
-    )
+  function requireEditable(
+    recordId: number,
+    tx: Parameters<typeof hasSubmissions>[0] = db,
+  ) {
+    if (hasSubmissions(tx, recordId))
       throw new FileApiError(
         409,
         "PROFILE_LOCKED",
-        "This profile is already used for matching. Create a new version before changing its documents.",
+        "This profile already has submissions drafted from its matches and its documents can no longer change.",
       );
   }
   return {
@@ -207,7 +201,8 @@ export function createDocumentService(
       try {
         return db.transaction(
           (tx) => {
-            requireEditable(recordId);
+            requireEditable(recordId, tx);
+            clearStaleLedger(tx, recordId);
             // Recheck the quota under a SQLite write lock after the async upload.
             const total = tx
               .select({ total: count() })
@@ -287,6 +282,7 @@ export function createDocumentService(
       // Both storage adapters allow retrying deletion of an absent object.
       await storage.remove(row);
       db.transaction((tx) => {
+        clearStaleLedger(tx, recordId);
         tx.delete(businessDocuments)
           .where(eq(businessDocuments.id, row.id))
           .run();

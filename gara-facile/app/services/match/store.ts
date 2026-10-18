@@ -8,6 +8,26 @@ import {
 } from "../../db/schema";
 import type { ContractModel, MatchModel, StoredMatch } from "./types";
 
+type LedgerDb = Pick<BetterSQLite3Database, "select" | "delete">;
+
+// A submission drafted from a match is user work; its profile version is frozen.
+export function hasSubmissions(db: LedgerDb, businessRecordId: number) {
+  return !!db
+    .select({ id: submissions.id })
+    .from(submissions)
+    .innerJoin(contractMatches, eq(submissions.contractMatchId, contractMatches.id))
+    .where(eq(contractMatches.businessRecordId, businessRecordId))
+    .get();
+}
+
+// Editing a profile version makes its Match ledger stale: the latest run wins
+// (ADR 0003), and the next one needs the profile approved again.
+export function clearStaleLedger(db: LedgerDb, businessRecordId: number) {
+  db.delete(contractMatches)
+    .where(eq(contractMatches.businessRecordId, businessRecordId))
+    .run();
+}
+
 export function createMatchStore(db: BetterSQLite3Database) {
   return {
     upsertContracts(models: ContractModel[]) {
