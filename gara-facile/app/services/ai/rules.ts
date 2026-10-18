@@ -36,23 +36,46 @@ const certKey = (name: string) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
+// Standard numbers ("9001", "14001", "27001"). Four-digit years are editions.
+const standards = (key: string) => [
+  ...new Set(key.split(" ").filter((t) => /^\d{3,}$/.test(t) && !/^(19|20)\d\d$/.test(t))),
+];
+const ALTERNATIVES = /\b(or|o|oppure|ou|oder|u)\b/;
+const SEVERITY: Record<ComplianceStatus, number> = { MEETS: 0, MISSING_DOC: 1, FAILS: 2 };
+
 const certification: Rule = (req, company, tender) => {
   const wanted = String(req.value ?? req.description);
   if (company.certifications.length === 0)
     return result("MISSING_DOC", `${wanted} required, no certifications declared`, "certifications");
   const key = certKey(wanted);
-  const within = (a: string, b: string) => ` ${b} `.includes(` ${a} `);
-  const held = company.certifications.find((c) => {
-    const k = certKey(c.name);
-    return k.length > 0 && key.length > 0 && (within(key, k) || within(k, key));
-  });
-  if (!held) return result("FAILS", `Missing ${wanted}`, "certifications");
   const now = tender.now ?? new Date();
-  if (held.expiresAt && new Date(held.expiresAt).getTime() < now.getTime())
-    return result("FAILS", `${held.name} expired on ${held.expiresAt}`, "certifications");
-  if (!held.hasDocument)
-    return result("MISSING_DOC", `${held.name} declared but certificate not uploaded`, "certifications");
-  return result("MEETS", `${held.name} held with document`, "certifications");
+  const judge = (held: CompanyFacts["certifications"][number] | undefined, missing: string) => {
+    if (!held) return result("FAILS", `Missing ${missing}`, "certifications");
+    if (held.expiresAt && new Date(held.expiresAt).getTime() < now.getTime())
+      return result("FAILS", `${held.name} expired on ${held.expiresAt}`, "certifications");
+    if (!held.hasDocument)
+      return result("MISSING_DOC", `${held.name} declared but certificate not uploaded`, "certifications");
+    return result("MEETS", `${held.name} held with document`, "certifications");
+  };
+  const codes = standards(key);
+  if (codes.length === 0) {
+    const within = (a: string, b: string) => ` ${b} `.includes(` ${a} `);
+    const held = company.certifications.find((c) => {
+      const k = certKey(c.name);
+      return k.length > 0 && key.length > 0 && (within(key, k) || within(k, key));
+    });
+    return judge(held, wanted);
+  }
+  // "ISO 9001 and 14001" needs both standards; "ISO 9001 or 14001" needs one.
+  const checks = codes.map((code) =>
+    judge(
+      company.certifications.find((c) => standards(certKey(c.name)).includes(code)),
+      codes.length === 1 ? wanted : `${code} (${wanted} required)`,
+    ),
+  );
+  const pick = ALTERNATIVES.test(key) ? Math.min : Math.max;
+  const target = pick(...checks.map((c) => SEVERITY[c.status]));
+  return checks.find((c) => SEVERITY[c.status] === target)!;
 };
 
 const turnoverBasis = (text: string) =>

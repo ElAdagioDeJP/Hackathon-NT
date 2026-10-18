@@ -72,6 +72,31 @@ test("certification: held, expired, missing, undocumented", () => {
   assert.equal(status(req({ kind: "certification", value: "ISO 9001" }), { ...company, certifications: [] }), "MISSING_DOC");
 });
 
+test("certification: a combined requirement needs every standard it names", () => {
+  const only9001 = { ...company, certifications: [{ name: "ISO 9001:2015", hasDocument: true }] };
+  const both = {
+    ...company,
+    certifications: [
+      { name: "ISO 9001:2015", hasDocument: true },
+      { name: "UNI EN ISO 14001:2015", hasDocument: true },
+    ],
+  };
+  for (const value of ["ISO 9001 and 14001", "UNI EN ISO 9001 e 14001", "ISO 9001, ISO 14001"]) {
+    assert.equal(status(req({ kind: "certification", value }), only9001), "FAILS", value);
+    assert.equal(status(req({ kind: "certification", value }), both), "MEETS", value);
+  }
+  const r = evaluate(req({ kind: "certification", value: "ISO 9001 and 14001" }), only9001, tender);
+  assert.match(r.reason, /14001/);
+  // Alternatives are met by any one of them.
+  assert.equal(status(req({ kind: "certification", value: "ISO 9001 o ISO 14001" }), only9001), "MEETS");
+  // An undocumented certificate still downgrades the whole requirement.
+  const undocumented = { ...company, certifications: [both.certifications[0], { name: "ISO 14001", hasDocument: false }] };
+  assert.equal(status(req({ kind: "certification", value: "ISO 9001 and 14001" }), undocumented), "MISSING_DOC");
+  // A held certificate that names a different standard is not a match.
+  assert.equal(status(req({ kind: "certification", value: "ISO 9001" }), { ...company, certifications: [{ name: "ISO 9001 and 14001", hasDocument: true }] }), "MEETS");
+  assert.equal(status(req({ kind: "certification", value: "ISO 45001" }), both), "FAILS");
+});
+
 test("min_turnover: average, total, each year and boundaries", () => {
   // average = 720k
   assert.equal(status(req({ kind: "min_turnover", value: 720_000, description: "fatturato medio annuo" })), "MEETS");
