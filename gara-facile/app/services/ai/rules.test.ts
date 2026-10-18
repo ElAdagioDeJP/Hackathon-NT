@@ -68,6 +68,8 @@ test("certification: held, expired, missing, undocumented", () => {
   assert.equal(status(req({ kind: "certification", value: "serie UNI EN ISO 9000" }), iso9001), "MEETS");
   // 9001 must not match 19001 by substring.
   assert.equal(status(req({ kind: "certification", value: "ISO 19001" })), "FAILS");
+  // Nothing declared yet is a gap to review, not proof the company lacks it.
+  assert.equal(status(req({ kind: "certification", value: "ISO 9001" }), { ...company, certifications: [] }), "MISSING_DOC");
 });
 
 test("min_turnover: average, total, each year and boundaries", () => {

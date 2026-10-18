@@ -6,6 +6,9 @@ import {
   toCompanyFacts,
   type ProfileFactsInput,
 } from "./profileFacts";
+import { evaluateAll } from "./rules";
+import { verdict } from "./scoring";
+import type { Requirement } from "./types";
 
 function input(overrides: Partial<ProfileFactsInput> = {}): ProfileFactsInput {
   return {
@@ -66,7 +69,7 @@ test("toCompanyFacts matches certifications against document names", () => {
   assert.equal("expiresAt" in iso27001, false);
 });
 
-test("toCompanyFacts falls back to demo for empty lists and financial fields", () => {
+test("toCompanyFacts never fills a real profile with demo company data", () => {
   const demo = demoCompanyFacts();
   const facts = toCompanyFacts(
     input({
@@ -74,21 +77,37 @@ test("toCompanyFacts falls back to demo for empty lists and financial fields", (
         id: 7,
         offerings: "  ",
         cpvCodes: [],
-        certifications: ["ISO 9001"],
+        certifications: [],
         languages: [],
       },
+      documents: [],
     }),
-    demo,
   );
-  assert.equal(facts.offerings, demo.offerings);
-  assert.deepEqual(facts.cpvCodes, demo.cpvCodes);
-  assert.deepEqual(facts.languages, demo.languages);
-  assert.equal(facts.employees, demo.employees);
-  assert.equal(facts.isSme, demo.isSme);
-  assert.equal(facts.bidGuaranteeCapacityEur, demo.bidGuaranteeCapacityEur);
-  assert.equal(facts.maxExecutionDays, demo.maxExecutionDays);
-  assert.deepEqual(facts.referenceProjects, demo.referenceProjects);
-  assert.deepEqual(facts.annualTurnover, demo.annualTurnover);
+  assert.equal(facts.name, "Acme S.r.l.");
+  assert.equal(facts.offerings, "");
+  assert.deepEqual(facts.cpvCodes, []);
+  assert.deepEqual(facts.languages, []);
+  assert.deepEqual(facts.certifications, []);
+  assert.deepEqual(facts.annualTurnover, []);
+  assert.deepEqual(facts.referenceProjects, []);
+  assert.equal(facts.employees, undefined);
+  assert.equal(facts.isSme, undefined);
+  assert.equal(facts.bidGuaranteeCapacityEur, undefined);
+  assert.equal(facts.maxExecutionDays, undefined);
+
+  // The demo company meets every one of these; an empty profile must not.
+  const requirements: Requirement[] = [
+    { id: "c", kind: "certification", description: "", value: "ISO 9001", page: 1, quote: "", confidence: 1 },
+    { id: "t", kind: "min_turnover", description: "", value: 1_000_000, page: 1, quote: "", confidence: 1 },
+    { id: "g", kind: "bid_guarantee", description: "", value: 40_000, unit: "EUR", page: 1, quote: "", confidence: 1 },
+    { id: "p", kind: "similar_projects", description: "", value: 2, unit: "count", page: 1, quote: "", confidence: 1 },
+    { id: "e", kind: "execution_deadline", description: "", value: 180, page: 1, quote: "", confidence: 1 },
+  ];
+  const tender = { tenderId: "t", estimatedValueEur: 2_000_000, now: new Date("2026-10-17") };
+  assert.equal(verdict(evaluateAll(requirements, demo, tender)), "GO");
+  const results = evaluateAll(requirements, facts, tender);
+  assert.deepEqual(new Set(results.map((r) => r.status)), new Set(["MISSING_DOC"]));
+  assert.equal(verdict(results), "REVIEW");
 });
 
 test("toCompanyFacts matches certification names ignoring punctuation", () => {

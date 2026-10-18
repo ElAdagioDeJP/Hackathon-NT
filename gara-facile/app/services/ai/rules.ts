@@ -38,6 +38,8 @@ const certKey = (name: string) =>
 
 const certification: Rule = (req, company, tender) => {
   const wanted = String(req.value ?? req.description);
+  if (company.certifications.length === 0)
+    return result("MISSING_DOC", `${wanted} required, no certifications declared`, "certifications");
   const key = certKey(wanted);
   const within = (a: string, b: string) => ` ${b} `.includes(` ${a} `);
   const held = company.certifications.find((c) => {

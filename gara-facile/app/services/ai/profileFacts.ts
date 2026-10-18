@@ -27,47 +27,31 @@ function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-export function toCompanyFacts(
-  input: ProfileFactsInput,
-  demo: CompanyFacts = demoCompanyFacts(),
-): CompanyFacts {
-  const offerings =
-    input.record.offerings && input.record.offerings.trim()
-      ? input.record.offerings
-      : demo.offerings;
-  const cpvCodes = input.record.cpvCodes.length
-    ? [...input.record.cpvCodes]
-    : [...demo.cpvCodes];
-  const languages = input.record.languages.length
-    ? [...input.record.languages]
-    : [...demo.languages];
-  const certifications = input.record.certifications.length
-    ? input.record.certifications.map((name) => {
-        const doc = input.documents.find((d) =>
-          normalize(d.originalName).includes(normalize(name)),
-        );
-        return {
-          name,
-          ...(doc?.expiresAt ? { expiresAt: doc.expiresAt.slice(0, 10) } : {}),
-          hasDocument: doc !== undefined,
-        };
-      })
-    : demo.certifications.map((c) => ({ ...c }));
+// A real profile only carries what the company declared. Fields the profile
+// UI does not collect yet stay empty so the rules report MISSING_DOC instead
+// of judging the company on the demo company's figures.
+export function toCompanyFacts(input: ProfileFactsInput): CompanyFacts {
+  const certifications = input.record.certifications.map((name) => {
+    const doc = input.documents.find((d) =>
+      normalize(d.originalName).includes(normalize(name)),
+    );
+    return {
+      name,
+      ...(doc?.expiresAt ? { expiresAt: doc.expiresAt.slice(0, 10) } : {}),
+      hasDocument: doc !== undefined,
+    };
+  });
   return {
     businessRecordId: input.record.id,
     name: input.business.name,
     country: input.business.country,
     city: input.business.city,
-    offerings,
-    cpvCodes,
+    offerings: input.record.offerings?.trim() ?? "",
+    cpvCodes: [...input.record.cpvCodes],
     certifications,
-    languages,
-    annualTurnover: demo.annualTurnover.map((t) => ({ ...t })),
-    employees: demo.employees,
-    isSme: demo.isSme,
-    bidGuaranteeCapacityEur: demo.bidGuaranteeCapacityEur,
-    maxExecutionDays: demo.maxExecutionDays,
-    referenceProjects: demo.referenceProjects.map((p) => ({ ...p })),
+    languages: [...input.record.languages],
+    annualTurnover: [],
+    referenceProjects: [],
   };
 }
 

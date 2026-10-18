@@ -1,8 +1,9 @@
 # Demo company — Nordest Software S.r.l. (fictional)
 
 `demo-company.json` is a `CompanyFacts` object (see `app/services/ai/_contract.mock.ts`, later `types.ts`).
-`getCompanyFacts()` returns it when there is no database or no `businessRecordId`, and uses it to fill
-fields the profile UI does not collect yet. All names and figures are fictional.
+`getCompanyFacts()` returns it only when there is no database or no `businessRecordId`. A real profile
+never borrows its figures: fields the profile UI does not collect yet stay empty and the rules report
+`MISSING_DOC`. All names and figures are fictional.
 
 ## Calibration for the 3 demo tenders (2 red, 1 green)
 
