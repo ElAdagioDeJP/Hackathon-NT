@@ -9,6 +9,12 @@ import {
   type EvolusRequirement,
 } from "@/app/services/ai/evolusBlocks";
 import type { Requirement } from "@/app/services/ai/types";
+import {
+  clientIp,
+  evolusRunLimiter,
+  RateLimitError,
+  tooManyRequests,
+} from "@/app/services/limits/rate-limit";
 
 // The extractor spends Evolus credits and reading a tender PDF takes minutes (~2.5 min measured),
 // so POST starts the job in the background and GET reports it. Results are cached per tender.
@@ -87,6 +93,8 @@ export async function POST(request: Request) {
     }
     if (jobs.get(tenderId)?.state === "running") return status(tenderId);
 
+    // Counts the start of each paid extraction; the job itself runs in the background.
+    await evolusRunLimiter.run(`ip:${clientIp(request.headers)}`, async () => {});
     jobs.set(tenderId, { state: "running" });
     void extractWithEvolus(bytes, fixture.pdf, { timeoutMs: 600_000 })
       .then(async (items) => {
@@ -112,6 +120,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof AnalyzeError)
       return Response.json({ error: error.message }, { status: error.status });
+    if (error instanceof RateLimitError) return tooManyRequests(error);
     return evolusErrorResponse(error);
   }
 }

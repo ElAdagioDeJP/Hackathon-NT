@@ -62,3 +62,14 @@ export function clientIp(headers: Headers) {
 export const matchLimiter = createLimiter({ max: 5, windowMs: 10 * 60_000, concurrent: 4 });
 // Tender analysis: several LLM calls on the shared GPU per run.
 export const analyzeLimiter = createLimiter({ max: 10, windowMs: 10 * 60_000, concurrent: 2 });
+// Evolus assistant chat: one agent call per message.
+export const chatLimiter = createLimiter({ max: 20, windowMs: 10 * 60_000, concurrent: 4 });
+// Evolus extractor and workflow runs read a whole tender PDF and spend credits.
+export const evolusRunLimiter = createLimiter({ max: 3, windowMs: 60 * 60_000, concurrent: 2 });
+
+export function tooManyRequests(error: RateLimitError) {
+  return Response.json(
+    { error: error.message },
+    { status: 429, headers: { "retry-after": String(error.retryAfterSeconds) } },
+  );
+}

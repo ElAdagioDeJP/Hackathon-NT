@@ -1,5 +1,11 @@
 import { evolusErrorResponse } from "@/app/services/ai/evolusBlocks";
 import { evolusChat } from "@/app/services/ai/evolus";
+import {
+  chatLimiter,
+  clientIp,
+  RateLimitError,
+  tooManyRequests,
+} from "@/app/services/limits/rate-limit";
 
 const MAX_MESSAGE = 4000;
 
@@ -19,9 +25,13 @@ export async function POST(request: Request) {
   const conversationId =
     typeof body?.conversationId === "string" && body.conversationId ? body.conversationId : undefined;
   try {
-    const result = await evolusChat([{ role: "user", content: message }], conversationId);
+    // Public endpoint: every message spends an Evolus agent call.
+    const result = await chatLimiter.run(`ip:${clientIp(request.headers)}`, () =>
+      evolusChat([{ role: "user", content: message }], conversationId),
+    );
     return Response.json({ answer: result.content, conversationId: result.conversationId });
   } catch (error) {
+    if (error instanceof RateLimitError) return tooManyRequests(error);
     return evolusErrorResponse(error);
   }
 }
