@@ -74,9 +74,13 @@ export function endpointFor(
 }
 
 // Models sometimes wrap JSON in a fenced block despite response_format.
-function parseJson(content: string) {
+function parseJson(content: string, role: LlmRole) {
   const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-  return JSON.parse((fenced ? fenced[1] : content).trim());
+  try {
+    return JSON.parse((fenced ? fenced[1] : content).trim());
+  } catch {
+    throw new LlmError(`LLM ${role} returned content that is not valid JSON: ${content.slice(0, 200)}`);
+  }
 }
 
 const retryable = (status: number) => status === 429 || status >= 500;
@@ -161,7 +165,7 @@ export function createLlmClient(deps: {
       run.completionTokens = json.usage?.completion_tokens;
       let data: T;
       if (options.schema) {
-        const parsed = options.schema.safeParse(parseJson(content));
+        const parsed = options.schema.safeParse(parseJson(content, options.role));
         if (!parsed.success)
           throw new LlmError(`LLM ${options.role} returned JSON not matching schema: ${parsed.error.message.slice(0, 300)}`);
         data = parsed.data;

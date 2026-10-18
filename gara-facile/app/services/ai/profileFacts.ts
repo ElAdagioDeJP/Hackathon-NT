@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { AnalyzeError } from "./analyze";
 import type { CompanyFacts } from "./types";
 import demoJson from "../../../fixtures/company/demo-company.json";
 
@@ -81,13 +82,13 @@ export async function getCompanyFacts(
     .from(businessRecords)
     .where(eq(businessRecords.id, businessRecordId))
     .get();
-  if (!record) throw new Error("Business record not found");
+  if (!record) throw new AnalyzeError("Business record not found.", 404);
   const business = db
     .select()
     .from(businesses)
     .where(eq(businesses.id, record.businessId))
     .get();
-  if (!business) throw new Error("Business record not found");
+  if (!business) throw new AnalyzeError("Business record not found.", 404);
   const { getDocumentService } = await import("../files/runtime");
   const documents = (await getDocumentService()).list(businessRecordId);
   return toCompanyFacts({

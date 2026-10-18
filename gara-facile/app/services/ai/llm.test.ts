@@ -108,3 +108,17 @@ test("endpoint config comes from role-specific env vars", () => {
   assert.deepEqual(endpointFor("draft", env), { baseUrl: "http://x:8000/v1", model: "gemma", apiKey: "s" });
   assert.throws(() => endpointFor("extract", env), /LLM_EXTRACT_BASE_URL/);
 });
+
+test("a reply that is not JSON is an LlmError, not a crash", async () => {
+  const h = harness([() => reply("Sorry, I cannot help with that.")]);
+  await assert.rejects(
+    () =>
+      h.client.chat({
+        role: "extract",
+        messages: [{ role: "user", content: "hi" }],
+        schema: z.object({ items: z.array(z.number()) }),
+      }),
+    (error: Error) => error.name === "LlmError" && /not valid JSON/.test(error.message),
+  );
+  assert.equal(h.runs[0].ok, false);
+});
