@@ -6,8 +6,11 @@ export class TedApiError extends Error {
   readonly status?: number;
   readonly body?: unknown;
 
-  constructor(message: string, options?: { status?: number; body?: unknown }) {
-    super(message);
+  constructor(
+    message: string,
+    options?: { status?: number; body?: unknown; cause?: unknown },
+  ) {
+    super(message, { cause: options?.cause });
     this.name = "TedApiError";
     this.status = options?.status;
     this.body = options?.body;
@@ -44,6 +47,7 @@ export async function searchNotices(
   } catch (error) {
     throw new TedApiError(
       `TED search request failed: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     );
   }
 

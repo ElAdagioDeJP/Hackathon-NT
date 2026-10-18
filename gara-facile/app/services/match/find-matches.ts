@@ -14,9 +14,15 @@ export class MatchError extends Error {
   }
 }
 
+// A hung TED or Evolus call must not keep the Find matches action open.
+export const TED_TIMEOUT_MS = 20_000;
+export const EVOLUS_TIMEOUT_MS = 90_000;
+
 export interface FindMatchesDeps {
   searchNotices?: typeof fetchCandidateContracts;
   requestMatches?: typeof requestEvolusMatches;
+  tedTimeoutMs?: number;
+  evolusTimeoutMs?: number;
 }
 
 export function createMatchService(
@@ -27,6 +33,8 @@ export function createMatchService(
   const store = createMatchStore(db);
   const loadCandidates = deps.searchNotices ?? fetchCandidateContracts;
   const askEvolus = deps.requestMatches ?? requestEvolusMatches;
+  const tedTimeoutMs = deps.tedTimeoutMs ?? TED_TIMEOUT_MS;
+  const evolusTimeoutMs = deps.evolusTimeoutMs ?? EVOLUS_TIMEOUT_MS;
 
   return {
     profile(token: string | undefined) {
@@ -56,8 +64,13 @@ export function createMatchService(
 
       let candidates;
       try {
-        candidates = await loadCandidates(business);
+        candidates = await loadCandidates(business, {
+          signal: AbortSignal.timeout(tedTimeoutMs),
+        });
       } catch (error) {
+        if (isTimeout(error)) {
+          throw new MatchError("TED did not answer in time. Please try again.");
+        }
         if (error instanceof TedApiError || error instanceof MatchError) {
           throw new MatchError(publicTedMessage(error));
         }
@@ -76,8 +89,15 @@ export function createMatchService(
 
       let content: string;
       try {
-        content = await askEvolus(business, candidates);
+        content = await askEvolus(business, candidates, {
+          signal: AbortSignal.timeout(evolusTimeoutMs),
+        });
       } catch (error) {
+        if (isTimeout(error)) {
+          throw new MatchError(
+            "The Matching agent did not answer in time. Please try again.",
+          );
+        }
         if (error instanceof EvolusApiError) {
           throw new MatchError(error.message);
         }
@@ -120,4 +140,11 @@ function publicTedMessage(error: Error): string {
   }
   if (error instanceof MatchError) return error.message;
   return "Could not load contracts from TED. Please try again.";
+}
+
+// Both clients wrap fetch errors and keep the abort reason as the cause.
+function isTimeout(error: unknown): boolean {
+  return [error, error instanceof Error ? error.cause : undefined].some(
+    (e) => e instanceof Error && e.name === "TimeoutError",
+  );
 }

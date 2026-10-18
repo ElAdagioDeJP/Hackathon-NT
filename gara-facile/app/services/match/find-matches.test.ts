@@ -5,7 +5,9 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { EMPTY_PROFILE } from "../../business-profile/types";
 import { createProfileService } from "../business/profiles";
+import { requestEvolusMatches } from "./evolus";
 import { createMatchService } from "./find-matches";
+import { fetchCandidateContracts } from "./ted-candidates";
 import type { ContractModel } from "./types";
 
 const complete = {
@@ -134,6 +136,40 @@ test("find matches requires an approved profile", async () => {
     await assert.rejects(
       () => service.findMatches(draft.newToken),
       /Approve your business profile/,
+    );
+  } finally {
+    f.sqlite.close();
+  }
+});
+
+test("find matches gives up on TED and Evolus calls that never answer", async () => {
+  const f = fixture();
+  try {
+    const token = f.profiles.save(undefined, complete, true, true).newToken!;
+    // Real clients behind a fetch that hangs until its signal aborts.
+    const hang: typeof fetch = (_url, init) =>
+      new Promise((_resolve, reject) =>
+        init?.signal?.addEventListener("abort", () => reject(init.signal!.reason)),
+      );
+    process.env.EU_API_KEY ??= "test-key";
+    const config = { apiKey: "k", appId: "a", agentId: "g", baseUrl: "https://evolus.test" };
+
+    const tedHangs = createMatchService(f.db, {
+      searchNotices: (business, options) =>
+        fetchCandidateContracts(business, { ...options, fetchImpl: hang }),
+      tedTimeoutMs: 20,
+    });
+    await assert.rejects(() => tedHangs.findMatches(token), /TED did not answer in time/);
+
+    const evolusHangs = createMatchService(f.db, {
+      searchNotices: async () => candidates,
+      requestMatches: (business, contracts, options) =>
+        requestEvolusMatches(business, contracts, { ...options, fetchImpl: hang, config }),
+      evolusTimeoutMs: 20,
+    });
+    await assert.rejects(
+      () => evolusHangs.findMatches(token),
+      /Matching agent did not answer in time/,
     );
   } finally {
     f.sqlite.close();
