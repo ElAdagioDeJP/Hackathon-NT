@@ -27,12 +27,20 @@ export interface EvolusMatchOptions {
   config?: EvolusConfig;
 }
 
+// "assistant" is the main agent (EVOLUS_AGENT_ID); "match" is the Matching agent
+// (EVOLUS_MATCH_AGENT_ID, falling back to EVOLUS_AGENT_ID).
+export type EvolusAgentRole = "assistant" | "match";
+
 export function readEvolusConfig(
   env: NodeJS.ProcessEnv = process.env,
+  role: EvolusAgentRole = "assistant",
 ): EvolusConfig {
   const apiKey = env.EVOLUS_API_KEY?.trim();
   const appId = env.EVOLUS_APP_ID?.trim();
-  const agentId = env.EVOLUS_AGENT_ID?.trim();
+  const agentVar = role === "match" ? "EVOLUS_MATCH_AGENT_ID" : "EVOLUS_AGENT_ID";
+  const agentId =
+    (role === "match" ? env.EVOLUS_MATCH_AGENT_ID?.trim() : undefined) ||
+    env.EVOLUS_AGENT_ID?.trim();
   const baseUrl = (env.EVOLUS_BASE_URL?.trim() || DEFAULT_BASE_URL).replace(
     /\/$/,
     "",
@@ -41,7 +49,7 @@ export function readEvolusConfig(
   const missing = [
     !apiKey && "EVOLUS_API_KEY",
     !appId && "EVOLUS_APP_ID",
-    !agentId && "EVOLUS_AGENT_ID",
+    !agentId && agentVar,
   ].filter(Boolean);
 
   if (missing.length) {
@@ -58,7 +66,7 @@ export async function requestEvolusMatches(
   contracts: ContractModel[],
   options?: EvolusMatchOptions,
 ): Promise<string> {
-  const config = options?.config ?? readEvolusConfig();
+  const config = options?.config ?? readEvolusConfig(process.env, "match");
   const fetchImpl = options?.fetchImpl ?? fetch;
   const model = `${config.appId}:${config.agentId}`;
   const userContent = buildMatchUserMessage(business, contracts);

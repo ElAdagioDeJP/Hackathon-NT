@@ -36,7 +36,7 @@ yarn-error.log*
 !.env.example
 
 # private local file storage
-/var/uploads/
+/var/
 
 # Generated locally from app/db/schema.ts; do not commit migration artifacts.
 /drizzle/

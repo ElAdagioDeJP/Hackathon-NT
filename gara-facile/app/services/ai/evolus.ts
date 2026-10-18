@@ -13,6 +13,8 @@ export interface EvolusDeps {
   env?: NodeJS.ProcessEnv;
   config?: EvolusConfig;
   log?: (line: string) => void;
+  /** Overrides the 30 s default, e.g. for PDF extraction. */
+  timeoutMs?: number;
 }
 
 export interface EvolusChatMessage {
@@ -91,7 +93,7 @@ async function call(
 ): Promise<{ body: unknown; response: Response }> {
   const fetchImpl = deps.fetchImpl ?? fetch;
   const log = deps.log ?? console.log;
-  const timeout = AbortSignal.timeout(TIMEOUT_MS);
+  const timeout = AbortSignal.timeout(deps.timeoutMs ?? TIMEOUT_MS);
   const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
   const method = init.method ?? "GET";
   const started = Date.now();
