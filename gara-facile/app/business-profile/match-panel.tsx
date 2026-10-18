@@ -53,6 +53,7 @@ export function MatchPanel({ enabled }: { enabled: boolean }) {
 
   const visible = matches.filter((match) => match.type !== "none");
   const hiddenNone = matches.length - visible.length;
+  const lastRun = matches[0]?.matchedAt;
 
   return (
     <section className="match-panel" aria-label="Contract matches">
@@ -77,6 +78,14 @@ export function MatchPanel({ enabled }: { enabled: boolean }) {
       {error ? (
         <p className="match-error" role="alert">
           {error}
+          {matches.length
+            ? " The matches below are from your last successful run."
+            : ""}
+        </p>
+      ) : null}
+      {lastRun ? (
+        <p className="field-hint">
+          Last successful run: {new Date(lastRun).toLocaleString()}
         </p>
       ) : null}
       {notice ? (

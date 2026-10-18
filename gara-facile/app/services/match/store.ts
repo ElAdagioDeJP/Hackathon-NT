@@ -54,6 +54,7 @@ export function createMatchStore(db: BetterSQLite3Database) {
             .where(eq(contractMatches.businessRecordId, businessRecordId))
             .run();
         }
+        const matchedAt = new Date();
         for (const match of matches) {
           tx.insert(contractMatches)
             .values({
@@ -62,6 +63,7 @@ export function createMatchStore(db: BetterSQLite3Database) {
               type: match.type,
               score: match.score,
               rationale: match.rationale,
+              matchedAt,
             })
             .run();
         }
@@ -77,6 +79,7 @@ export function createMatchStore(db: BetterSQLite3Database) {
           type: contractMatches.type,
           score: contractMatches.score,
           rationale: contractMatches.rationale,
+          matchedAt: contractMatches.matchedAt,
           title: contracts.title,
           url: contracts.url,
           deadline: contracts.deadline,
@@ -94,6 +97,7 @@ export function createMatchStore(db: BetterSQLite3Database) {
           type: row.type,
           score: row.score,
           rationale: row.rationale,
+          matchedAt: row.matchedAt?.toISOString() ?? null,
           title: row.title,
           url: row.url,
           deadline: row.deadline,

@@ -45,6 +45,7 @@ export interface StoredMatch extends MatchModel {
   url: string;
   deadline: string | null;
   buyerName: string | null;
+  matchedAt: string | null;
 }
 
 export function toBusinessModel(profile: BusinessProfileDraft): BusinessModel {

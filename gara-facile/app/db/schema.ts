@@ -145,6 +145,9 @@ export const contractMatches = sqliteTable("contract_matches", {
     .default("none"),
   score: integer("score").notNull().default(0),
   rationale: text("rationale").notNull().default(""),
+  // When the Find matches run that wrote this row finished. Null for rows
+  // written before the column existed.
+  matchedAt: integer("matched_at", { mode: "timestamp" }),
 });
 
 export const submissions = sqliteTable("submissions", {
